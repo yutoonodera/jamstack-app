@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  web:  # Next.js + Tailwind
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app             # ソースコードのみ共有
+      - /app/node_modules  # ← 必ずマウントして node_modules はコンテナ内専用にする
+
+    environment:
+      - WATCHPACK_POLLING=true
+    command: npm run dev
+    depends_on:
+      - wordpress
+
+  wordpress:
+    image: wordpress:6.6-php8.2-apache
+    ports:
+      - "8000:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    depends_on:
+      - db
+
+  db:  # MySQL
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  wordpress_data:
+  db_data:
