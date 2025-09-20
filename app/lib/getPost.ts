@@ -1,14 +1,16 @@
-// app/lib/getPost.ts
 export type PostDetail = {
     id: number;
+    slug: string;
     title: { rendered: string };
     content: { rendered: string };
   };
 
-  export async function getPost(id: string): Promise<PostDetail | null> {
+  export async function getPost(slug: string): Promise<PostDetail | null> {
     const res = await fetch(
-      `http://host.docker.internal:8000/wp-json/wp/v2/posts/${id}?_embed`
+      `http://localhost:8000/wp-json/wp/v2/posts?slug=${slug}&_embed`
     );
     if (!res.ok) return null;
-    return res.json();
+
+    const posts = await res.json();
+    return posts.length > 0 ? posts[0] : null;
   }

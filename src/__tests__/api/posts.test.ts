@@ -36,9 +36,11 @@ describe("GET /api/posts", () => {
 
   it("fetch失敗時は500を返す", async () => {
     jest.spyOn(global, "fetch").mockResolvedValueOnce({
-      ok: false,
-      json: async () => [],
-    } as any);
+        ok: false,
+        status: 500,
+        json: async () => ({})
+      } as any);
+
 
     const response = await GET();
     const data = await response.json();

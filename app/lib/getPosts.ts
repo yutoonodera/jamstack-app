@@ -1,4 +1,3 @@
-// app/lib/getPosts.ts
 export type Post = {
     date: string | number | Date;
     id: number;
@@ -8,7 +7,7 @@ export type Post = {
   };
 
   export async function getPosts(): Promise<Post[]> {
-    const res = await fetch("http://localhost:3000/api/posts", { cache: "no-store" });
+    const res = await fetch("http://localhost:8000/wp-json/wp/v2/posts?_embed");
     if (!res.ok) return [];
     return res.json();
   }
