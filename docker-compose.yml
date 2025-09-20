@@ -6,19 +6,20 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - .:/app             # ソースコードのみ共有
-      - /app/node_modules  # ← 必ずマウントして node_modules はコンテナ内専用にする
-
+      - .:/app
+      - /app/node_modules
     environment:
       - WATCHPACK_POLLING=true
     command: npm run dev
     depends_on:
       - wordpress
+    networks:
+      - app-network
 
   wordpress:
     image: wordpress:6.6-php8.2-apache
     ports:
-      - "8000:80"
+      - "8000:80"  # ホストからは localhost:8000
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wordpress
@@ -28,6 +29,8 @@ services:
       - wordpress_data:/var/www/html
     depends_on:
       - db
+    networks:
+      - app-network
 
   db:  # MySQL
     image: mysql:8.0
@@ -38,7 +41,13 @@ services:
       MYSQL_PASSWORD: wordpress
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - app-network
 
 volumes:
   wordpress_data:
   db_data:
+
+networks:
+  app-network:
+    driver: bridge
