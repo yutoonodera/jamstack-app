@@ -10,6 +10,8 @@
         "tailwind:init": "tailwindcss init -p"
     },
     "dependencies": {
+        "@react-google-maps/api": "^2.20.7",
+        "@sendgrid/mail": "^8.1.6",
         "framer-motion": "^12.23.13",
         "next": "14.0.0",
         "react": "18.2.0",

@@ -1,6 +1,8 @@
 export const revalidate = 60;  // 60秒ごとに再検証
-// app/tech-blog/post/[id]/page.tsx
+// app/tech-blog/post/[slug]/page.tsx
 import { getPost } from "../../lib/getPost";
+import PostsList from "../../components/PostsList";
+import ContactSection from "../../components/ContactSection";
 
 type Props = {
   params: { slug: string };
@@ -8,19 +10,23 @@ type Props = {
 
 export default async function PostPage({ params }: Props) {
   const post = await getPost(params.slug);
-  console.log("取得した記事:", post); // ★ここで確認
   if (!post) return <div>記事が見つかりません</div>;
 
   return (
-    <main className="p-6 font-sans">
-      <h1
-        className="text-3xl font-bold mb-6"
-        dangerouslySetInnerHTML={{ __html: post.title.rendered }}
-      />
-      <article
-        className="prose"
-        dangerouslySetInnerHTML={{ __html: post.content.rendered }}
-      />
+    <main className="p-6 font-sans max-w-4xl mx-auto">
+      <div className="bg-white border rounded-2xl shadow-md p-8 mb-12">
+        <h1
+          className="text-3xl font-bold mb-6"
+          dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+        />
+        <article
+          className="prose prose-lg max-w-none text-gray-800"
+          dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+        />
+      </div>
+      <ContactSection />
+      {/* 他の記事リストを下に表示 */}
+      <PostsList />
     </main>
   );
 }

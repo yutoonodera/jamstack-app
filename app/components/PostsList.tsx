@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Post, getTechPosts } from "../../app/lib/getTechPosts";
+import { Post, getTechPosts } from "../lib/getTechPosts";
 import SearchBox from "../components/SearchBox";
 import PostCard from "../components/PostCard";
 
-export default function HomePage() {
+export default function PostsList() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [search, setSearch] = useState("");
 
@@ -16,25 +16,15 @@ export default function HomePage() {
   const filteredPosts = posts.filter((post) => {
     if (!search.trim()) return true;
 
-    const keywords = search
-      .toLowerCase()
-      .split(/\s+/)
-      .filter(Boolean);
-
+    const keywords = search.toLowerCase().split(/\s+/).filter(Boolean);
     const title = post.title.rendered.toLowerCase();
 
     return keywords.every((kw) => title.includes(kw));
   });
 
   return (
-    <main className="p-6 font-sans max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">テックブログ</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        株式会社moveeのエンジニアが書いています
-      </p>
-
-      {/* 検索窓 */}
-      <SearchBox value={search} onChange={setSearch} />
+    <section className="mt-12">
+      <h2 className="text-2xl font-bold mb-6">他の記事</h2>
 
       {/* 投稿リスト */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -48,6 +38,6 @@ export default function HomePage() {
           </p>
         )}
       </div>
-    </main>
+    </section>
   );
 }
