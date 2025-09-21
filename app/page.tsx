@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import PostsChart from "./components/PostsChart";
+import ContactSection from "./components/ContactSection";
 
 export default function HomePage() {
   const services = [
     {
       title: "ソフトウェア開発",
       description: "最新技術を活用し、お客様の課題を解決するソフトウェアを開発します。",
-      href: "/services/software",
+      href: "/services/development",
     },
     {
       title: "アポ取得代行",
@@ -52,6 +53,7 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      <ContactSection />
       {/* 投稿グラフ */}
       <PostsChart />
     </main>
