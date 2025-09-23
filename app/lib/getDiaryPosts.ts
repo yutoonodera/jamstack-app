@@ -9,7 +9,7 @@ export type DiaryPost = {
   export async function getDiaryPosts(): Promise<DiaryPost[]> {
     const res = await fetch(
         // "http://localhost:8000/wp-json/wp/v2/posts?_embed&categories=10"
-        "http://localhost:8000/wp-json/wp/v2/posts?_embed&"
+        "http://localhost:8000/wp-json/wp/v2/posts?_embed&categories=10"
 
     );
     if (!res.ok) throw new Error("Failed to fetch diary posts");
