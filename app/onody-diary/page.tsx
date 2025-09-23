@@ -101,9 +101,11 @@ export default function OnodyDiaryPage() {
         <div className="mt-6">
           {currentPost ? (
             <>
-              <h2 className="text-xl mb-2">
-                {new Date(currentPost.date).toLocaleDateString("ja-JP")} の日記
-              </h2>
+            <h2 className="text-xl mb-2">
+            {new Date(currentPost.date).toLocaleDateString("ja-JP")}（
+            {new Date(currentPost.date).toLocaleDateString("ja-JP", { weekday: "short" })}
+            ）の日記
+            </h2>
               <div
                 key={currentPost.id}
                 className="mb-6 p-4 border rounded-lg shadow"
