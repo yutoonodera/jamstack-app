@@ -1,8 +1,9 @@
 name: Deploy to VPS (test)
 
 on:
-  workflow_dispatch:
-
+   push:
+    branches:
+      - staging
 jobs:
   deploy:
     runs-on: ubuntu-latest
