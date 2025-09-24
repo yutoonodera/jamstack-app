@@ -1,23 +1,35 @@
-name: Test SSH connection
+name: Deploy to VPS (test)
 
 on:
-  push:
-    branches:
-      - staging
+  workflow_dispatch:
+
 jobs:
-  test-ssh:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Test SSH
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ubuntu
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            whoami
-            pwd
+            set -eux
+            echo "===== ディレクトリ作成 ====="
+            mkdir -p /home/ubuntu/staging-app
+            ls -ld /home/ubuntu/staging-app
+
+            echo "===== ファイル同期 ====="
+            rsync -avz --exclude node_modules --exclude .git ./ /home/ubuntu/staging-app
+            ls -l /home/ubuntu/staging-app
+
+            echo "===== Docker Compose ====="
+            cd /home/ubuntu/staging-app
+            docker compose -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.staging.yml up -d --build
+
+            echo "===== デプロイ完了 ====="
