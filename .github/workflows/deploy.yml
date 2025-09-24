@@ -1,35 +1,10 @@
-name: Deploy to VPS (staging)
-
-on:
-  push:
-    branches:
-      - staging  # stagingブランチにpushしたらデプロイ
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Sync files to VPS
-        uses: appleboy/rsync-action@v0.1.9
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "./"
-          target: "/home/username/staging-app"
-          rsync_opts: "-avz --exclude node_modules --exclude .git"
-
-      - name: Deploy with Docker Compose
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd /home/username/staging-app
-            docker compose -f docker-compose.staging.yml pull
-            docker compose -f docker-compose.staging.yml up -d --build
+- name: Test SSH connection
+  uses: appleboy/ssh-action@v0.1.7
+  with:
+    host: ${{ secrets.VPS_HOST }}
+    username: ${{ secrets.VPS_USER }}
+    key: ${{ secrets.VPS_SSH_KEY }}
+    script: |
+      echo "SSH 接続成功"
+      whoami
+      pwd
