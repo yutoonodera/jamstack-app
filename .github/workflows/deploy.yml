@@ -15,6 +15,6 @@
       rsync -avz --exclude node_modules --exclude .git ./ /home/ubuntu/staging-app
 
       # Docker Compose 再起動
-      cd /home/username/staging-app
+      cd /home/ubuntu/staging-app
       docker compose -f docker-compose.staging.yml pull
       docker compose -f docker-compose.staging.yml up -d --build
