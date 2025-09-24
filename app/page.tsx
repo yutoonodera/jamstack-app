@@ -8,7 +8,7 @@ import ContactSection from "./components/ContactSection";
 export default function HomePage() {
   const services = [
     {
-      title: "ソフトウェア開発",
+      title: "ソフトウェア開発a",
       description: "最新技術を活用し、お客様の課題を解決するソフトウェアを開発します。",
       href: "/services/development",
     },
