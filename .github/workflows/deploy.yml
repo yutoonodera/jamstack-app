@@ -8,35 +8,3 @@
       echo "SSH 接続成功"
       whoami
       pwd
-- name: Deploy to VPS via SSH + rsync
-  uses: appleboy/ssh-action@v0.1.7
-  with:
-    host: ${{ secrets.VPS_HOST }}
-    username: ${{ secrets.VPS_USER }}
-    key: ${{ secrets.VPS_SSH_KEY }}
-    script: |
-      set -eux
-
-      echo "===== ディレクトリ作成 ====="
-      mkdir -p /home/ubuntu/staging-app
-      chown -R ubuntu:ubuntu /home/ubuntu/staging-app
-      ls -ld /home/ubuntu/staging-app
-
-      echo "===== ファイル同期 (rsync) ====="
-      rsync -avz --exclude node_modules --exclude .git ./ /home/ubuntu/staging-app
-      ls -l /home/ubuntu/staging-app
-
-      echo "===== Docker Compose 再起動 ====="
-      cd /home/ubuntu/staging-app
-
-      if command -v docker-compose >/dev/null 2>&1; then
-        docker-compose version
-        docker-compose -f docker-compose.staging.yml pull
-        docker-compose -f docker-compose.staging.yml up -d --build
-      else
-        docker compose version
-        docker compose -f docker-compose.staging.yml pull
-        docker compose -f docker-compose.staging.yml up -d --build
-      fi
-
-      echo "===== デプロイ完了 ====="
