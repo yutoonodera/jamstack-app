@@ -3,33 +3,30 @@ name: Deploy to VPS (staging)
 on:
   push:
     branches:
-      - staging  # stagingブランチにpushしたらデプロイ
+      - staging  # stagingブランチにpushしたら自動デプロイ
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Sync files to VPS
-        uses: appleboy/rsync-action@v0.1.8
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "./"
-          target: "/home/username/staging-app"
-          rsync_opts: "-avz --exclude node_modules --exclude .git"
-
-      - name: Deploy with Docker Compose
+      - name: Deploy to VPS via SSH + rsync
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            # ディレクトリ作成
+            mkdir -p /home/username/staging-app
+
+            # ファイル同期（node_modules と .git は除外）
+            rsync -avz --exclude node_modules --exclude .git ./ /home/username/staging-app
+
+            # Docker Compose 再起動
             cd /home/username/staging-app
             docker compose -f docker-compose.staging.yml pull
             docker compose -f docker-compose.staging.yml up -d --build
