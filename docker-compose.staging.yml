@@ -1,7 +1,5 @@
-version: "3.9"
-
 services:
-  web:  # Next.js + Tailwind
+  web:
     build:
       context: .
       dockerfile: Dockerfile.staging
@@ -22,7 +20,7 @@ services:
     ports:
       - "8000:80"
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
@@ -33,7 +31,7 @@ services:
     networks:
       - app-network
 
-  db:  # MySQL
+  db:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword

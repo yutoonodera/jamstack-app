@@ -1,10 +1,57 @@
-- name: Test SSH connection
-  uses: appleboy/ssh-action@v0.1.7
-  with:
-    host: ${{ secrets.VPS_HOST }}
-    username: ${{ secrets.VPS_USER }}
-    key: ${{ secrets.VPS_SSH_KEY }}
-    script: |
-      echo "SSH 接続成功"
-      whoami
-      pwd
+name: Deploy to VPS (staging)
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:  # 手動実行も可能に
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # SSH 用のセットアップ
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      # rsync で VPS にファイル同期（中身だけ）
+      - name: Sync files to VPS
+        run: |
+          rsync -avz \
+            --exclude node_modules \
+            --exclude .git \
+            --exclude .next \
+            --exclude .vscode \
+            --exclude "*.log" \
+            ./ ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app/
+        env:
+          RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
+
+      # VPS に SSH して Docker Compose 再起動
+      - name: Deploy Docker Compose
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -eux
+            echo "===== ディレクトリ確認 ====="
+            mkdir -p /home/ubuntu/staging-app
+            ls -ld /home/ubuntu/staging-app
+
+            echo "===== Docker Compose 再起動 ====="
+            cd /home/ubuntu/staging-app
+            docker compose -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.staging.yml up -d --build
+
+            echo "===== デプロイ完了 ====="
