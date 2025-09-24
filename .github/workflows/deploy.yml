@@ -1,20 +1,41 @@
-- name: Deploy to VPS via SSH + rsync
-  uses: appleboy/ssh-action@v0.1.7
-  with:
-    host: ${{ secrets.VPS_HOST }}
-    username: ${{ secrets.VPS_USER }}
-    key: ${{ secrets.VPS_SSH_KEY }}
-    script: |
-      # rsync があるか確認
-      rsync --version || sudo apt install -y rsync
+name: Deploy to VPS (staging)
 
-      # ディレクトリ作成
-      mkdir -p /home/ubuntu/staging-app
+on:
+  push:
+    branches:
+      - staging  # staging ブランチに push されたときにデプロイ
 
-      # ファイル同期
-      rsync -avz --exclude node_modules --exclude .git ./ /home/ubuntu/staging-app
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-      # Docker Compose 再起動
-      cd /home/ubuntu/staging-app
-      docker compose -f docker-compose.staging.yml pull
-      docker compose -f docker-compose.staging.yml up -d --build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to VPS via SSH + rsync
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # ディレクトリ作成と権限設定
+            mkdir -p /home/ubuntu/staging-app
+            chown -R ubuntu:ubuntu /home/ubuntu/staging-app
+
+            # ファイル同期
+            rsync -avz --exclude node_modules --exclude .git ./ /home/ubuntu/staging-app
+
+            # コピーされたファイルを確認
+            ls -l /home/ubuntu/staging-app
+
+            # Docker Compose 再起動
+            cd /home/ubuntu/staging-app
+            if command -v docker-compose >/dev/null 2>&1; then
+              docker-compose -f docker-compose.staging.yml pull
+              docker-compose -f docker-compose.staging.yml up -d --build
+            else
+              docker compose -f docker-compose.staging.yml pull
+              docker compose -f docker-compose.staging.yml up -d --build
+            fi
