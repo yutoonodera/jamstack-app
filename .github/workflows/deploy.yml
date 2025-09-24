@@ -25,7 +25,7 @@ jobs:
             ls -ld /home/ubuntu/staging-app
 
             echo "===== ファイル同期 ====="
-            rsync -avz --exclude node_modules --exclude .git ./ /home/ubuntu/staging-app
+            rsync -avz --exclude node_modules --exclude .git $GITHUB_WORKSPACE/ /home/ubuntu/staging-app/
             ls -l /home/ubuntu/staging-app
 
             echo "===== Docker Compose ====="
