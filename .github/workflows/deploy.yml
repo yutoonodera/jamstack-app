@@ -9,10 +9,10 @@
       rsync --version || sudo apt install -y rsync
 
       # ディレクトリ作成
-      mkdir -p /home/username/staging-app
+      mkdir -p /home/ubuntu/staging-app
 
       # ファイル同期
-      rsync -avz --exclude node_modules --exclude .git ./ /home/username/staging-app
+      rsync -avz --exclude node_modules --exclude .git ./ /home/ubuntu/staging-app
 
       # Docker Compose 再起動
       cd /home/username/staging-app
