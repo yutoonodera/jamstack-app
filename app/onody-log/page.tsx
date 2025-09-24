@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { getDiaryPosts, DiaryPost } from "../lib/getDiaryPosts";
+import { getLogPosts, LogPost } from "../lib/getLogPosts";
 import Header from "../components/Header";
 
 const Calendar = dynamic(() => import("react-calendar"), { ssr: false });
 import "react-calendar/dist/Calendar.css";
 
-export default function OnodyDiaryPage() {
-  const [posts, setPosts] = useState<DiaryPost[]>([]);
+export default function OnodyLogPage() {
+  const [posts, setPosts] = useState<LogPost[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentPostIndex, setCurrentPostIndex] = useState<number>(0);
 
   useEffect(() => {
-    getDiaryPosts().then((data) => {
+    getLogPosts().then((data) => {
       const sorted = data.sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
