@@ -1,9 +1,10 @@
 name: Deploy to VPS (test)
 
 on:
-   push:
+  push:
     branches:
       - staging
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,12 +21,14 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -eux
+
             echo "===== ディレクトリ作成 ====="
             mkdir -p /home/ubuntu/staging-app
             ls -ld /home/ubuntu/staging-app
 
             echo "===== ファイル同期 ====="
-            rsync -avz --exclude node_modules --exclude .git $GITHUB_WORKSPACE/ /home/ubuntu/staging-app/
+            # SSH 内で $GITHUB_WORKSPACE は使えないので、カレントディレクトリの ./ をソースにする
+            rsync -avz --exclude node_modules --exclude .git ./ /home/ubuntu/staging-app/
             ls -l /home/ubuntu/staging-app
 
             echo "===== Docker Compose ====="
