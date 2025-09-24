@@ -5,7 +5,7 @@
     username: ${{ secrets.VPS_USER }}
     key: ${{ secrets.VPS_SSH_KEY }}
     script: |
-      set -eux  # コマンド実行時にエラーで停止し、実行コマンドも表示
+      set -eux
 
       echo "===== ディレクトリ作成 ====="
       mkdir -p /home/ubuntu/staging-app
@@ -19,7 +19,6 @@
       echo "===== Docker Compose 再起動 ====="
       cd /home/ubuntu/staging-app
 
-      echo "---- Docker Compose バージョン確認 ----"
       if command -v docker-compose >/dev/null 2>&1; then
         docker-compose version
         docker-compose -f docker-compose.staging.yml pull
