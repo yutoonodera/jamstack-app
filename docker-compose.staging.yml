@@ -22,12 +22,14 @@ services:
     ports:
       - "8000:80"
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
     volumes:
       - wordpress_data:/var/www/html
+      - ./wait-for-it.sh:/wait-for-it.sh  # MySQL 起動待ち用
+    command: ["./wait-for-it.sh", "db:3306", "--", "docker-entrypoint.sh", "apache2-foreground"]
     depends_on:
       - db
     networks:
