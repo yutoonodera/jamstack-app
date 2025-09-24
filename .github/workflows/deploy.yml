@@ -1,8 +1,9 @@
 name: Test SSH connection
 
 on:
-  workflow_dispatch:
-
+  push:
+    branches:
+      - staging
 jobs:
   test-ssh:
     runs-on: ubuntu-latest
