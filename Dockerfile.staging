@@ -1,19 +1,18 @@
-# node 20 Alpine
-FROM node:20-alpine
-
-# 作業ディレクトリ
+# 1. Node イメージ
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# 必要パッケージ
-RUN apk add --no-cache bash curl git
-
-# package.json だけ先にコピーして依存関係をインストール
 COPY package*.json ./
 RUN npm install
-RUN npm install -D tailwindcss postcss autoprefixer
 
-# アプリ用ポート
+COPY . .
+RUN npm run build
+
+# 2. 実行環境
+FROM node:18-alpine
+WORKDIR /app
+
+COPY --from=builder /app ./
 EXPOSE 3000
 
-# 開発モードで起動
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
