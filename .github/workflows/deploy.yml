@@ -4,16 +4,18 @@ on:
   push:
     branches:
       - staging
-  workflow_dispatch:
+  workflow_dispatch:  # 手動実行も可能に
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # リポジトリをチェックアウト
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # SSH 用のセットアップ
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -21,6 +23,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
+      # rsync で VPS にファイル同期（中身だけ）
       - name: Sync files to VPS
         run: |
           rsync -avz \
@@ -33,7 +36,8 @@ jobs:
         env:
           RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
 
-      - name: Deploy Docker Compose (zero-downtime)
+      # VPS に SSH して Docker Compose 再起動
+      - name: Deploy Docker Compose
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -41,27 +45,23 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -eux
+            echo "===== ディレクトリ確認 ====="
+            mkdir -p /home/ubuntu/staging-app
+            ls -ld /home/ubuntu/staging-app
+
+            echo "===== Docker Compose 再起動 ====="
             cd /home/ubuntu/staging-app
 
-            echo "===== Pull latest images ====="
+            # イメージを最新化
             docker compose -f docker-compose.staging.yml pull
 
-            echo "===== Build new web container with npm install ====="
-            # 新しいコンテナ名で立ち上げ（web_new）
-            docker compose -f docker-compose.staging.yml up -d --no-deps --build --scale web=0 web_new
-            docker compose -f docker-compose.staging.yml exec -T web_new npm install
+            # コンテナをバックグラウンドで起動（ビルドは一旦行わず）
+            docker compose -f docker-compose.staging.yml up -d
 
-            echo "===== Health check for web_new ====="
-            # 簡易チェック: 80番や Next.js ポートにアクセスできるか
-            sleep 5  # 起動待ち（必要なら curl で確認）
+            # web コンテナ内で依存を更新
+            docker compose -f docker-compose.staging.yml exec -T web npm install
 
-            echo "===== Switch traffic to web_new ====="
-            # 古い web コンテナ停止 & 名前を web_old に変更
-            docker compose -f docker-compose.staging.yml stop web
-            docker compose -f docker-compose.staging.yml rename web web_old
-            docker compose -f docker-compose.staging.yml rename web_new web
+            # 再ビルド（必要なら）
+            docker compose -f docker-compose.staging.yml up -d --build
 
-            echo "===== Remove old container ====="
-            docker compose -f docker-compose.staging.yml rm -f web_old
-
-            echo "===== Deploy Complete ====="
+            echo "===== デプロイ完了 ====="
