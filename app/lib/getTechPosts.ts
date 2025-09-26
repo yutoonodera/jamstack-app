@@ -8,7 +8,7 @@ export type Post = {
 
 export async function getTechPosts(): Promise<Post[]> {
   const res = await fetch(
-    "http://localhost:8000/wp-json/wp/v2/posts?_embed&categories=3"
+    "http://wordpress:80/wp-json/wp/v2/posts?_embed&categories=3"
   );
   if (!res.ok) return [];
   return res.json();
