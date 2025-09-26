@@ -2,7 +2,5 @@ node_modules/
 .next/
 out/
 dist/
-*.js
-*.js.map
 .env
 .env.local
