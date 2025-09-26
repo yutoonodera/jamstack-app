@@ -7,7 +7,7 @@ export type PostDetail = {
 
   export async function getPost(slug: string): Promise<PostDetail | null> {
     const res = await fetch(
-      `http://wordpress:80/wp-json/wp/v2/posts?slug=${slug}&_embed`
+      `http://133.167.103.10:8000/wp-json/wp/v2/posts?slug=${slug}&_embed`
     );
     if (!res.ok) return null;
 
