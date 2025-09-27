@@ -49,22 +49,19 @@ jobs:
             mkdir -p /home/ubuntu/staging-app
             ls -ld /home/ubuntu/staging-app
 
+            echo "===== Create .env.staging ====="
+            cat <<EOF > /home/ubuntu/staging-app/.env.staging
+            NEXT_PUBLIC_API_URL=${{ secrets.STAGING_API_URL }}
+            EOF
+
             echo "===== Docker Compose 再起動 ====="
             cd /home/ubuntu/staging-app
 
             # イメージを最新化
             docker compose -f docker-compose.staging.yml pull
 
-            # コンテナをバックグラウンドで起動（ビルドは一旦行わず）
-            docker compose -f docker-compose.staging.yml up -d
-
-            # web コンテナ内で依存を更新
-            docker compose -f docker-compose.staging.yml exec -T web npm install
-
-            # 再ビルド（必要なら）
-            docker compose -f docker-compose.staging.yml up -d --build
+            # コンテナをバックグラウンドで起動
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
 
             echo "===== デプロイ完了 ====="
-      - name: Create .env.staging
-        run: |
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.STAGING_API_URL }}" > .env.staging
+
