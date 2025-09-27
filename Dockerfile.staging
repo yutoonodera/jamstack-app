@@ -1,28 +1,11 @@
-# ===== ビルド用 =====
-FROM node:20-alpine AS builder
-WORKDIR /app
-
-# 依存だけ先にコピー
-COPY package*.json ./
-
-# devDependencies も含めてインストール
-RUN npm install --legacy-peer-deps
-
-# ソースコードコピー
-COPY . .
-
-# ビルド時に環境変数を渡す
-ARG NEXT_PUBLIC_WORDPRESS_API_URL
-ENV NEXT_PUBLIC_WORDPRESS_API_URL=$NEXT_PUBLIC_WORDPRESS_API_URL
-
-# Next.js ビルド
-RUN npm run build -- --no-lint
-
-# ===== 本番用 =====
 FROM node:20-alpine
 WORKDIR /app
 
-COPY --from=builder /app ./
-EXPOSE 3000
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
 
+COPY . .
+RUN npm run build --no-lint
+
+EXPOSE 3000
 CMD ["npm", "run", "start"]
