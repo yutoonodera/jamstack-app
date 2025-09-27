@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import PostsChart from "./components/PostsChart";
 import ContactSection from "./components/ContactSection";
+import AsisasChart from "./components/AsisasChart";
 
 export default function HomePage() {
   const services = [
@@ -27,7 +28,7 @@ export default function HomePage() {
   return (
     <main className="p-6 font-sans">
       <h1 className="text-3xl font-bold mb-6">moveeサイト</h1>
-
+      <AsisasChart />
       {/* 事業紹介 */}
       <section className="mt-12">
         <h2 className="text-2xl font-semibold mb-6">事業内容</h2>

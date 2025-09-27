@@ -7,9 +7,10 @@ export type LogPost = {
   };
 
   export async function getLogPosts(): Promise<LogPost[]> {
+    const baseUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || "http://localhost:8000";
     const res = await fetch(
         // "http://localhost:8000/wp-json/wp/v2/posts?_embed&categories=10"
-        "http://localhost:8000/wp-json/wp/v2/posts?_embed&categories=10"
+        `${baseUrl}/wp-json/wp/v2/posts?_embed&categories=10`
 
     );
     if (!res.ok) throw new Error("Failed to fetch diary posts");
