@@ -7,9 +7,7 @@ export type PostDetail = {
 
   export async function getPost(slug: string): Promise<PostDetail | null> {
     const baseUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || "http://localhost:8000";
-    const res = await fetch(
-      `${baseUrl}/wp-json/wp/v2/posts?slug=${slug}&_embed`
-    );
+    const res = await fetch(`${baseUrl}/wp-json/wp/v2/posts?slug=${slug}&_embed`);
     if (!res.ok) return null;
 
     const posts = await res.json();

@@ -10,7 +10,6 @@ export type LogPost = {
     const baseUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || "http://localhost:8000";
     const res = await fetch(
         `${baseUrl}/wp-json/wp/v2/posts?_embed&categories=10`
-
     );
     if (!res.ok) throw new Error("Failed to fetch diary posts");
     return res.json();
