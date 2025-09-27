@@ -36,35 +36,31 @@ jobs:
         env:
           RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
 
-      # VPS に SSH して Docker Compose 再起動
       - name: Deploy Docker Compose
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ubuntu
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -eux
-            echo "===== ディレクトリ確認 ====="
-            mkdir -p /home/ubuntu/staging-app
-            ls -ld /home/ubuntu/staging-app
+            host: ${{ secrets.VPS_HOST }}
+            username: ubuntu
+            key: ${{ secrets.VPS_SSH_KEY }}
+            script: |
+              set -eux
+              cd /home/ubuntu/staging-app
 
-            echo "===== Docker Compose 再起動 ====="
-            cd /home/ubuntu/staging-app
+              echo "===== Pull latest images ====="
+              docker compose --env-file <(echo "WORDPRESS_DB_PASSWORD=${{ secrets.WP_DB_PASSWORD }}") \
+                             -f docker-compose.staging.yml pull
 
-            # イメージを最新化
-            docker compose -f docker-compose.staging.yml pull
+              echo "===== Build web container ====="
+              docker compose -f docker-compose.staging.yml up -d --no-deps --build web
 
-            # コンテナをバックグラウンドで起動（ビルドは一旦行わず）
-            docker compose -f docker-compose.staging.yml up -d
+              echo "===== Install npm dependencies inside web ====="
+              docker compose -f docker-compose.staging.yml exec -T web npm install
 
-            # web コンテナ内で依存を更新
-            docker compose -f docker-compose.staging.yml exec -T web npm install
+              echo "===== Rebuild and restart web ====="
+              docker compose -f docker-compose.staging.yml up -d --build web
 
-            # 再ビルド（必要なら）
-            docker compose -f docker-compose.staging.yml up -d --build
+              echo "===== Deploy Complete ====="
 
-            echo "===== デプロイ完了 ====="
       - name: Create .env.staging
         run: |
           echo "NEXT_PUBLIC_API_URL=${{ secrets.STAGING_API_URL }}" > .env.staging
