@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   web:
     build:
@@ -5,11 +7,10 @@ services:
       dockerfile: Dockerfile.staging
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
     environment:
-      - WATCHPACK_POLLING=true
+      - NODE_ENV=production
+    env_file:
+      - .env.staging
     depends_on:
       - wordpress
     networks:
@@ -22,7 +23,7 @@ services:
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_NAME: wordpress
     volumes:
       - wordpress_data:/var/www/html
@@ -34,10 +35,10 @@ services:
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
     networks:
