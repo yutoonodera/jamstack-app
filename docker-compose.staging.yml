@@ -7,13 +7,13 @@ services:
       dockerfile: Dockerfile.staging
       args:
         NEXT_PUBLIC_WORDPRESS_API_URL: ${NEXT_PUBLIC_WORDPRESS_API_URL}
+        WORDPRESS_API_URL: "http://wordpress:80"
     ports:
       - "3000:3000"
     env_file:
       - .env.staging
     environment:
       - NODE_ENV=production
-      - WORDPRESS_API_URL=http://wordpress:80
     depends_on:
       - wordpress
     networks:
