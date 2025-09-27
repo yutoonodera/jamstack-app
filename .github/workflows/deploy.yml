@@ -50,7 +50,7 @@ jobs:
             ls -ld /home/ubuntu/staging-app
 
             cat <<EOF > /home/ubuntu/staging-app/.env.staging
-            NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_API_URL }}
+            NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
             EOF
 
             echo "===== Docker Compose 再起動 ====="
