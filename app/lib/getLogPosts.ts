@@ -11,7 +11,6 @@ export type LogPost = {
     const res = await fetch(
         // "http://localhost:8000/wp-json/wp/v2/posts?_embed&categories=10"
         `${baseUrl}/wp-json/wp/v2/posts?_embed&categories=10`
-
     );
     if (!res.ok) throw new Error("Failed to fetch diary posts");
     return res.json();
