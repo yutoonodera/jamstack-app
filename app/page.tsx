@@ -28,7 +28,6 @@ export default function HomePage() {
   return (
     <main className="p-6 font-sans">
       <h1 className="text-3xl font-bold mb-6">moveeサイト</h1>
-      <AisasChart />
       {/* 事業紹介 */}
       <h1 className="text-2xl font-bold mb-4">AISASモデルの可視化（出典: Li, H., & Pan, Y. (2023)</h1>
       <AisasChart />
