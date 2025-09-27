@@ -13,6 +13,7 @@ services:
       - .env.staging
     environment:
       - NODE_ENV=production
+      - WORDPRESS_API_URL=http://wordpress:80
     depends_on:
       - wordpress
     networks:
