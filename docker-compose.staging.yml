@@ -18,7 +18,7 @@ services:
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_PASSWORD: wordpress       # 直書き
       WORDPRESS_DB_NAME: wordpress
     volumes:
       - wordpress_data:/var/www/html
@@ -30,10 +30,10 @@ services:
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: rootpassword      # 直書き
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      MYSQL_PASSWORD: wordpress              # 直書き
     volumes:
       - db_data:/var/lib/mysql
     networks:
