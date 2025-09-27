@@ -4,18 +4,18 @@ on:
   push:
     branches:
       - staging
-  workflow_dispatch:  # 手動実行も可能
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # リポジトリをチェックアウト
+      # 1. リポジトリをチェックアウト
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # SSH 用のセットアップ
+      # 2. SSH のセットアップ
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -23,20 +23,19 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      # rsync で VPS にソース同期
+      # 3. rsync で VPS にファイル同期
       - name: Sync files to VPS
         run: |
           rsync -avz \
             --exclude node_modules \
             --exclude .git \
             --exclude .next \
-            --exclude .vscode \
             --exclude "*.log" \
             ./ ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app/
         env:
           RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
 
-      # VPS に SSH して Docker Compose 再起動
+      # 4. VPS に SSH して Docker Compose 再起動
       - name: Deploy Docker Compose
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -50,15 +49,13 @@ jobs:
             mkdir -p /home/ubuntu/staging-app
             ls -ld /home/ubuntu/staging-app
 
-            echo "===== .env.staging を作成 ====="
-            cat > /home/ubuntu/staging-app/.env.staging <<EOF
-            NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
-            EOF
-
             echo "===== Docker Compose 再起動 ====="
             cd /home/ubuntu/staging-app
 
-            # イメージを最新化してビルド＋起動
-            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
+            # 古いコンテナを停止
+            docker compose down || true
+
+            # 最新イメージを取得してビルド＋起動
+            docker compose up -d --build
 
             echo "===== デプロイ完了 ====="
