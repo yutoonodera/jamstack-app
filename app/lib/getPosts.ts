@@ -7,7 +7,7 @@ export type Post = {
   };
 
   export async function getPosts(): Promise<Post[]> {
-    const res = await fetch("http://localhost:8000/wp-json/wp/v2/posts?_embed");
+    const res = await fetch("http://133.167.103.10:8000/wp-json/wp/v2/posts?_embed");
     if (!res.ok) return [];
     return res.json();
   }

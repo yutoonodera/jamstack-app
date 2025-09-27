@@ -4,6 +4,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import PostsChart from "./components/PostsChart";
 import ContactSection from "./components/ContactSection";
+import AisasChart from "./components/AisasChart";
+
 
 export default function HomePage() {
   const services = [
@@ -29,6 +31,8 @@ export default function HomePage() {
       <h1 className="text-3xl font-bold mb-6">moveeサイト</h1>
 
       {/* 事業紹介 */}
+      <h1 className="text-2xl font-bold mb-4">AISASモデルの可視化（出典: Li, H., & Pan, Y. (2023)</h1>
+      <AisasChart />
       <section className="mt-12">
         <h2 className="text-2xl font-semibold mb-6">事業内容</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
