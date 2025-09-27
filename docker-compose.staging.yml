@@ -9,12 +9,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-    env_file:
-      - .env.staging
-    depends_on:
-      - wordpress
-    networks:
-      - app-network
+    command: sh -c "npm install && npm run build && npm run start"
 
   wordpress:
     image: wordpress:6.6-php8.2-apache
