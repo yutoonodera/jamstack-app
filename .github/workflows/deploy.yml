@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - staging
-  workflow_dispatch:  # 手動実行も可能に
+  workflow_dispatch:  # 手動実行も可能
 
 jobs:
   deploy:
@@ -18,12 +18,12 @@ jobs:
       # SSH 用のセットアップ
       - name: Setup SSH key
         run: |
-          mkdir -p $HOME/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > $HOME/.ssh/id_rsa
-          chmod 600 $HOME/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> $HOME/.ssh/known_hosts
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      # rsync で VPS にファイル同期（中身だけ）
+      # rsync で VPS にソース同期
       - name: Sync files to VPS
         run: |
           rsync -avz \
@@ -45,10 +45,12 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -eux
+
             echo "===== ディレクトリ確認 ====="
             mkdir -p /home/ubuntu/staging-app
             ls -ld /home/ubuntu/staging-app
 
+            echo "===== .env.staging を作成 ====="
             cat > /home/ubuntu/staging-app/.env.staging <<EOF
             NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
             EOF
@@ -56,11 +58,7 @@ jobs:
             echo "===== Docker Compose 再起動 ====="
             cd /home/ubuntu/staging-app
 
-            # イメージを最新化
-            docker compose -f docker-compose.staging.yml pull
-
-            # コンテナをバックグラウンドで起動
+            # イメージを最新化してビルド＋起動
             docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
 
             echo "===== デプロイ完了 ====="
-
