@@ -7,8 +7,9 @@ export type Post = {
 };
 
 export async function getTechPosts(): Promise<Post[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || "http://localhost:8000";
   const res = await fetch(
-    "http://133.167.103.10:8000/wp-json/wp/v2/posts?_embed&categories=3"
+    `${baseUrl}/wp-json/wp/v2/posts?_embed&categories=3`
   );
   if (!res.ok) return [];
   return res.json();
