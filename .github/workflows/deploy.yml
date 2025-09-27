@@ -58,6 +58,7 @@ jobs:
             docker compose -f docker-compose.staging.yml --env-file .env.staging down || true
 
             # 最新イメージを取得してビルド＋起動
-            docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
+
 
             echo "===== デプロイ完了 ====="
