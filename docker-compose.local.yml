@@ -1,22 +1,16 @@
 version: "3.9"
 
 services:
-  web:  # Next.js + Tailwind
+  web:
     build:
       context: .
       dockerfile: Dockerfile.local
     ports:
       - "3000:3000"
     volumes:
-      - .:/app
-      - /app/node_modules
-    environment:
-      - WATCHPACK_POLLING=true
+      - .:/app                 # ソースのみ
+      - /app/node_modules      # node_modules はコンテナ内
     command: npm run dev
-    depends_on:
-      - wordpress
-    networks:
-      - app-network
 
   wordpress:
     image: wordpress:6.6-php8.2-apache
