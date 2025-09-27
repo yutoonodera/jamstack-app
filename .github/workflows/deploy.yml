@@ -49,9 +49,8 @@ jobs:
             mkdir -p /home/ubuntu/staging-app
             ls -ld /home/ubuntu/staging-app
 
-            echo "===== Create .env.staging ====="
             cat <<EOF > /home/ubuntu/staging-app/.env.staging
-            NEXT_PUBLIC_API_URL=${{ secrets.STAGING_API_URL }}
+            NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_API_URL }}
             EOF
 
             echo "===== Docker Compose 再起動 ====="
