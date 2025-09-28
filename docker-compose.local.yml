@@ -11,6 +11,10 @@ services:
       - .:/app                 # ソースのみ
       - /app/node_modules      # node_modules はコンテナ内
     command: npm run dev
+    depends_on:
+      - wordpress
+    networks:
+      - app-network
 
   wordpress:
     image: wordpress:6.6-php8.2-apache
