@@ -8,9 +8,11 @@ import PostCard from "../components/PostCard";
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTechPosts().then(setPosts);
+    getTechPosts().then(setPosts)
+    .finally(() => setLoading(false));
   }, []);
 
   const filteredPosts = posts.filter((post) => {
@@ -38,15 +40,21 @@ export default function HomePage() {
 
       {/* 投稿リスト */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredPosts.map((post) => (
+      {loading && (
+          <p className="col-span-full text-center text-gray-500">
+            ロード中...
+          </p>
+      )}
+      {!loading &&
+        filteredPosts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
 
-        {filteredPosts.length === 0 && (
-          <p className="col-span-full text-center text-gray-500">
-            該当する記事がありません
-          </p>
-        )}
+      {!loading && filteredPosts.length === 0 && (
+        <p className="col-span-full text-center text-gray-500">
+          該当する記事がありません
+        </p>
+      )}
       </div>
     </main>
   );
