@@ -15,11 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build Docker image for testing
-        run: docker build -f Dockerfile.local -t next-app:test --target test .
-
-      - name: Run tests
-        run: docker run --rm next-app:test npm test
+      - name: Build Docker image for testing & test
+        run: |
+          docker build -f Dockerfile.local -t next-app:test .
+          docker run --rm next-app:test npm test
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
