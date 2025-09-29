@@ -25,7 +25,7 @@ describe("getPost", () => {
       const post = await getPost("test-slug");
       expect(post).toEqual(mockPost);
       expect(fetch).toHaveBeenCalledWith(
-        "http://localhost:8000/wp-json/wp/v2/posts?slug=test-slug&_embed"
+        "http://wordpress:80/wp-json/wp/v2/posts?slug=test-slug&_embed"
       );
     });
   });
@@ -46,6 +46,6 @@ describe("getPost", () => {
 
     await getPost("42");
     expect(fetch).toHaveBeenCalledWith(
-      "http://localhost:8000/wp-json/wp/v2/posts?slug=42&_embed"
+      "http://wordpress:80/wp-json/wp/v2/posts?slug=42&_embed"
     );
   });
