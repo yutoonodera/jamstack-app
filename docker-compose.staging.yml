@@ -46,10 +46,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wordpress.rule=Host(`wp.stg.movee.jp`)"
-      - "traefik.http.routers.wordpress.entrypoints=websecure"
-      - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
-      - "traefik.http.middlewares.wordpress-header.headers.customrequestheaders.X-Forwarded-Host=wp.stg.movee.jp"
+      - "traefik.http.middlewares.wordpress-header.headers.customrequestheaders.Host=wp.stg.movee.jp"
+      - "traefik.http.routers.wordpress.middlewares=wordpress-header"
     networks:
       - web
       - app-network
