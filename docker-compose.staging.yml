@@ -1,73 +1,91 @@
-services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile.staging
-    env_file:
-      - .env.staging
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`stg.movee.jp`)"
-      - "traefik.http.routers.web.entrypoints=websecure"
-      - "traefik.http.routers.web.tls.certresolver=myresolver"
-      - "traefik.http.services.web.loadbalancer.server.port=3000"
-    environment:
-      - NODE_ENV=production
-      - WORDPRESS_API_URL=https://stg.movee.jp/wp
-    depends_on:
-      - wordpress
-    networks:
-      - web
+# .github/workflows/deploy-staging.yml
+name: Deploy to VPS (staging)
 
-  wordpress:
-    image: wordpress:6.6-php8.2-apache
-    environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      WORDPRESS_DB_NAME: wordpress
-    volumes:
-      - wordpress_data:/var/www/html
-    depends_on:
-      - db
-    networks:
-      - web
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.wordpress.rule=Host(`stg.movee.jp`) && PathPrefix(`/wp`)"
-      - "traefik.http.routers.wordpress.entrypoints=websecure"
-      - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
-      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
 
-  db:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - web
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-  traefik:
-    image: traefik:v2.10
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedByDefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=y.onodera@movee.jp"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./letsencrypt:/letsencrypt
-    networks:
-      - web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Docker image for testing & test
+        run: |
+          docker build -f Dockerfile.local -t next-app:test .
+          docker run --rm next-app:test npm test
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync files to VPS
+        run: |
+          rsync -avz \
+            --exclude node_modules \
+            --exclude .git \
+            --exclude .next \
+            --exclude .vscode \
+            --exclude "*.log" \
+            ./ ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app/
+        env:
+          RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
+
+      - name: Setup Traefik network and acme.json
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -eux
+            # Traefik 用ネットワーク作成（存在しなければ）
+            if ! docker network inspect web >/dev/null 2>&1; then
+              docker network create web
+            fi
+
+            # letsencrypt ディレクトリと acme.json 作成
+            mkdir -p /home/ubuntu/staging-app/letsencrypt
+            touch /home/ubuntu/staging-app/letsencrypt/acme.json
+            chmod 600 /home/ubuntu/staging-app/letsencrypt/acme.json
+      - name: Deploy Docker Compose
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -eux
+            echo "===== ディレクトリ確認 ====="
+            mkdir -p /home/ubuntu/staging-app
+            ls -ld /home/ubuntu/staging-app
+
+            echo "===== .env.staging を作成 ====="
+            cat > /home/ubuntu/staging-app/.env.staging <<EOF
+            NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
+            NEXT_PUBLIC_ENV=staging
+            SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+            STAGING_AUTH_USER=${{ secrets.STAGING_AUTH_USER }}
+            STAGING_AUTH_PASSWORD=${{ secrets.STAGING_AUTH_PASSWORD }}
+            NEXT_PUBLIC_TECH_CAT_ID=${{ secrets.STAGING_TECH_CAT_ID }}
+            NEXT_PUBLIC_ONODY_CAT_ID=${{ secrets.STAGING_ONODY_CAT_ID }}
+            EOF
+
+            echo "===== Docker Compose 再起動 ====="
+            cd /home/ubuntu/staging-app
+
+            # 古いコンテナを停止
+            docker compose -f docker-compose.staging.yml --env-file .env.staging down || true
+
+            # 最新イメージを取得してビルド＋起動
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
+
+
+            echo "===== デプロイ完了 ====="
