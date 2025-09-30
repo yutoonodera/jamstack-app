@@ -1,75 +1,58 @@
+version: "3.9"
+
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile.staging
+      args:
+        NEXT_PUBLIC_WORDPRESS_API_URL: ${NEXT_PUBLIC_WORDPRESS_API_URL}
+        NEXT_PUBLIC_ONODY_CAT_ID: ${NEXT_PUBLIC_ONODY_CAT_ID}
+        NEXT_PUBLIC_TECH__CAT_ID: ${NEXT_PUBLIC_TECH_CAT_ID}
+    ports:
+      - "3000:3000"
     env_file:
       - .env.staging
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`stg.movee.jp`)"
-      - "traefik.http.routers.web.entrypoints=websecure"
-      - "traefik.http.routers.web.tls.certresolver=myresolver"
-      - "traefik.http.services.web.loadbalancer.server.port=3000"
     environment:
       - NODE_ENV=production
-      - WORDPRESS_API_URL=https://stg.movee.jp/wp
+      - WORDPRESS_API_URL=http://wordpress:80
     depends_on:
       - wordpress
     networks:
-      - web
+      - app-network
 
   wordpress:
     image: wordpress:6.6-php8.2-apache
+    ports:
+      - "8000:80"
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress   # とりあえず直書き
       WORDPRESS_DB_NAME: wordpress
     volumes:
       - wordpress_data:/var/www/html
     depends_on:
       - db
     networks:
-      - web
       - app-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.wordpress.rule=Host(`stg.movee.jp`) && PathPrefix(`/wp`)"
-      - "traefik.http.routers.wordpress.entrypoints=websecure"
-      - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
-      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
-
 
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: rootpassword  # とりあえず直書き
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
+      MYSQL_PASSWORD: wordpress          # とりあえず直書き
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - web
+      - app-network
 
-  traefik:
-    image: traefik:v2.10
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedByDefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=y.onodera@movee.jp"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./letsencrypt:/letsencrypt
-    networks:
-      - web
+volumes:
+  wordpress_data:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge
