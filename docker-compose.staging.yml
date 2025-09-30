@@ -15,7 +15,7 @@ services:
       - .env.staging
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`https.stg.movee.jp`)"
+      - "traefik.http.routers.web.rule=Host(`stg.movee.jp`)"
       - "traefik.http.routers.web.entrypoints=websecure"
       - "traefik.http.routers.web.tls.certresolver=myresolver"
       - "traefik.http.services.web.loadbalancer.server.port=3000"
@@ -43,7 +43,7 @@ services:
       - db
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wordpress.rule=Host(`https.stg.movee.jp`) && PathPrefix(`/wp`)"
+      - "traefik.http.routers.wordpress.rule=Host(`wp.stg.movee.jp`)"
       - "traefik.http.routers.wordpress.entrypoints=websecure"
       - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
