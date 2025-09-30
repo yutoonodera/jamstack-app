@@ -1,91 +1,58 @@
-# .github/workflows/deploy-staging.yml
-name: Deploy to VPS (staging)
+version: "3.9"
 
-on:
-  push:
-    branches:
-      - staging
-  workflow_dispatch:
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.staging
+      args:
+        NEXT_PUBLIC_WORDPRESS_API_URL: ${NEXT_PUBLIC_WORDPRESS_API_URL}
+        NEXT_PUBLIC_ONODY_CAT_ID: ${NEXT_PUBLIC_ONODY_CAT_ID}
+        NEXT_PUBLIC_TECH__CAT_ID: ${NEXT_PUBLIC_TECH_CAT_ID}
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.staging
+    environment:
+      - NODE_ENV=production
+      - WORDPRESS_API_URL=http://wordpress:80
+    depends_on:
+      - wordpress
+    networks:
+      - app-network
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  wordpress:
+    image: wordpress:6.6-php8.2-apache
+    ports:
+      - "8000:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress   # とりあえず直書き
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - app-network
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # とりあえず直書き
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress          # とりあえず直書き
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
 
-      - name: Build Docker image for testing & test
-        run: |
-          docker build -f Dockerfile.local -t next-app:test .
-          docker run --rm next-app:test npm test
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+volumes:
+  wordpress_data:
+  db_data:
 
-      - name: Sync files to VPS
-        run: |
-          rsync -avz \
-            --exclude node_modules \
-            --exclude .git \
-            --exclude .next \
-            --exclude .vscode \
-            --exclude "*.log" \
-            ./ ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app/
-        env:
-          RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
-
-      - name: Setup Traefik network and acme.json
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ubuntu
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -eux
-            # Traefik 用ネットワーク作成（存在しなければ）
-            if ! docker network inspect web >/dev/null 2>&1; then
-              docker network create web
-            fi
-
-            # letsencrypt ディレクトリと acme.json 作成
-            mkdir -p /home/ubuntu/staging-app/letsencrypt
-            touch /home/ubuntu/staging-app/letsencrypt/acme.json
-            chmod 600 /home/ubuntu/staging-app/letsencrypt/acme.json
-      - name: Deploy Docker Compose
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ubuntu
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -eux
-            echo "===== ディレクトリ確認 ====="
-            mkdir -p /home/ubuntu/staging-app
-            ls -ld /home/ubuntu/staging-app
-
-            echo "===== .env.staging を作成 ====="
-            cat > /home/ubuntu/staging-app/.env.staging <<EOF
-            NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
-            NEXT_PUBLIC_ENV=staging
-            SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
-            STAGING_AUTH_USER=${{ secrets.STAGING_AUTH_USER }}
-            STAGING_AUTH_PASSWORD=${{ secrets.STAGING_AUTH_PASSWORD }}
-            NEXT_PUBLIC_TECH_CAT_ID=${{ secrets.STAGING_TECH_CAT_ID }}
-            NEXT_PUBLIC_ONODY_CAT_ID=${{ secrets.STAGING_ONODY_CAT_ID }}
-            EOF
-
-            echo "===== Docker Compose 再起動 ====="
-            cd /home/ubuntu/staging-app
-
-            # 古いコンテナを停止
-            docker compose -f docker-compose.staging.yml --env-file .env.staging down || true
-
-            # 最新イメージを取得してビルド＋起動
-            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
-
-
-            echo "===== デプロイ完了 ====="
+networks:
+  app-network:
+    driver: bridge
