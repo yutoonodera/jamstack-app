@@ -37,20 +37,20 @@ services:
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress   # とりあえず直書き
       WORDPRESS_DB_NAME: wordpress
-      # WORDPRESS_SITEURL: https://wp.stg.movee.jp
-      # WORDPRESS_HOME: https://wp.stg.movee.jp
+      WORDPRESS_SITEURL: https://wp.stg.movee.jp
+      WORDPRESS_HOME: https://wp.stg.movee.jp
     volumes:
       - wordpress_data:/var/www/html
     depends_on:
       - db
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.wordpress.rule=Host(`wp.stg.movee.jp`)"
-    #   - "traefik.http.services.wordpress.loadbalancer.server.port=80"
-    #   - "traefik.http.middlewares.wordpress-header.headers.customrequestheaders.Host=wp.stg.movee.jp"
-    #   - "traefik.http.routers.wordpress.middlewares=wordpress-header"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.rule=Host(`wp.stg.movee.jp`)"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=8000"
+      - "traefik.http.middlewares.wordpress-header.headers.customrequestheaders.Host=wp.stg.movee.jp"
+      - "traefik.http.routers.wordpress.middlewares=wordpress-header"
     networks:
-      # - web
+      - web
       - app-network
 
   db:
