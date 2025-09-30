@@ -16,6 +16,7 @@ services:
       - "traefik.http.routers.web.rule=Host(`stg.movee.jp`)"
       - "traefik.http.routers.web.entrypoints=websecure"
       - "traefik.http.routers.web.tls.certresolver=myresolver"
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
     environment:
       - NODE_ENV=production
       - WORDPRESS_API_URL=http://wordpress:80
