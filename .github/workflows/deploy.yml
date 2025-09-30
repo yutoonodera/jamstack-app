@@ -38,6 +38,23 @@ jobs:
         env:
           RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
 
+      - name: Setup Traefik network and acme.json
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -eux
+            # Traefik 用ネットワーク作成（存在しなければ）
+            if ! docker network inspect web >/dev/null 2>&1; then
+              docker network create web
+            fi
+
+            # letsencrypt ディレクトリと acme.json 作成
+            mkdir -p /home/ubuntu/staging-app/letsencrypt
+            touch /home/ubuntu/staging-app/letsencrypt/acme.json
+            chmod 600 /home/ubuntu/staging-app/letsencrypt/acme.json
       - name: Deploy Docker Compose
         uses: appleboy/ssh-action@v0.1.7
         with:
