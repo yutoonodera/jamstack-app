@@ -7,6 +7,7 @@ export type Post = {
 };
 
 export async function getTechPosts(): Promise<Post[]> {
+
   const baseUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || "http://localhost:8000";
   const techCatId = process.env.NEXT_PUBLIC_TECH_CAT_ID || "3";
   const res = await fetch(
