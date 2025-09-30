@@ -1,9 +1,8 @@
-// app/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  // 環境がstagingでなければスルー
+
   if (process.env.NEXT_PUBLIC_ENV !== "staging") {
     return NextResponse.next();
   }
@@ -21,5 +20,7 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  return NextResponse.next();
+  const res = NextResponse.next();
+  res.headers.set("X-Robots-Tag", "noindex, nofollow");
+  return res;
 }
