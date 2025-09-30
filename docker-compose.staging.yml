@@ -50,7 +50,7 @@ services:
     #   - "traefik.http.middlewares.wordpress-header.headers.customrequestheaders.Host=wp.stg.movee.jp"
     #   - "traefik.http.routers.wordpress.middlewares=wordpress-header"
     networks:
-      - web
+      # - web
       - app-network
 
   db:
