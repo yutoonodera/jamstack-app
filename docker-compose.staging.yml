@@ -7,6 +7,8 @@ services:
       dockerfile: Dockerfile.staging
       args:
         NEXT_PUBLIC_WORDPRESS_API_URL: ${NEXT_PUBLIC_WORDPRESS_API_URL}
+        NEXT_PUBLIC_ONODY_CAT_ID: ${NEXT_PUBLIC_ONODY_CAT_ID}
+        NEXT_PUBLIC_TECH__CAT_ID: ${NEXT_PUBLIC_TECH_CAT_ID}
     ports:
       - "3000:3000"
     env_file:

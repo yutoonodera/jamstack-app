@@ -53,6 +53,12 @@ jobs:
             echo "===== .env.staging を作成 ====="
             cat > /home/ubuntu/staging-app/.env.staging <<EOF
             NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
+            NEXT_PUBLIC_ENV=staging
+            SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+            STAGING_AUTH_USER=${{ secrets.STAGING_AUTH_USER }}
+            STAGING_AUTH_PASSWORD=${{ secrets.STAGING_AUTH_PASSWORD }}
+            NEXT_PUBLIC_TECH_CAT_ID=${{ secrets.STAGING_TECH_CAT_ID }}
+            NEXT_PUBLIC_ONODY_CAT_ID=${{ secrets.STAGING_ONODY_CAT_ID }}
             EOF
 
             echo "===== Docker Compose 再起動 ====="
