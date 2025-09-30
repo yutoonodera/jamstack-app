@@ -44,7 +44,7 @@ services:
     depends_on:
       - db
     networks:
-      - web
+      # - web
       - app-network
 
   db:
