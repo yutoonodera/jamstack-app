@@ -57,8 +57,8 @@ jobs:
             SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
             STAGING_AUTH_USER=${{ secrets.STAGING_AUTH_USER }}
             STAGING_AUTH_PASSWORD=${{ secrets.STAGING_AUTH_PASSWORD }}
-            TECH_CAT_ID=${{ secrets.STAGING_TECH_CAT_ID }}
-            ONODY_CAT_ID=${{ secrets.STAGING_ONODY_CAT_ID }}
+            NEXT_PUBLIC_TECH_CAT_ID=${{ secrets.STAGING_TECH_CAT_ID }}
+            NEXT_PUBLIC_ONODY_CAT_ID=${{ secrets.STAGING_ONODY_CAT_ID }}
             EOF
 
             echo "===== Docker Compose 再起動 ====="

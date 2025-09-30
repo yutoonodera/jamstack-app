@@ -8,8 +8,8 @@ export type LogPost = {
 
 export async function getLogPosts(): Promise<LogPost[]> {
   // サーバー側で使うので NEXT_PUBLIC_ は不要
-  const baseUrl = process.env.WORDPRESS_API_URL || "http://localhost:8000";
-  const onodyCatId = process.env.ONODY_CAT_ID || "10";
+  const baseUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || "http://localhost:8000";
+  const onodyCatId = process.env.NEXT_PUBLIC_ONODY_CAT_ID || "10";
 
   const res = await fetch(`${baseUrl}/wp-json/wp/v2/posts?_embed&categories=${onodyCatId}`);
 
