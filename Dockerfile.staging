@@ -3,6 +3,7 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
+RUN apk add --no-cache curl
 
 COPY . .
 ARG NEXT_PUBLIC_WORDPRESS_API_URL
