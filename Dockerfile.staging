@@ -5,7 +5,8 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps
 RUN apk add --no-cache curl
 
-COPY . .
+COPY app ./app
+COPY src ./src
 ARG NEXT_PUBLIC_WORDPRESS_API_URL
 ARG NEXT_PUBLIC_TECH_CAT_ID
 ARG NEXT_PUBLIC_ONODY_CAT_ID
