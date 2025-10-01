@@ -1,7 +1,7 @@
 # ビルド不要なディレクトリ
-node_modules
-.next
-dist
+node_modules/
+.next/
+dist/
 coverage
 
 # ローカル専用
