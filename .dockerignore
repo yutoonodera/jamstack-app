@@ -9,6 +9,7 @@ coverage
 *.local
 *.bup
 middleware.ts-bup
+middleware.ts
 
 # Git 関連
 .git
