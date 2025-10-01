@@ -15,8 +15,11 @@ services:
       - .env.staging
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`stg.movee.jp`)"
+      - "traefik.http.routers.web-http.rule=Host(\"stg.movee.jp\")"
+      - "traefik.http.routers.web-http.entrypoints=web"
+      - "traefik.http.routers.web-http.service=web"
       - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.rule=Host(\"stg.movee.jp\")"
       - "traefik.http.routers.web.tls.certresolver=myresolver"
       - "traefik.http.services.web.loadbalancer.server.port=3000"
     environment:
