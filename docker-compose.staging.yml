@@ -15,13 +15,24 @@ services:
       - .env.staging
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web-http.rule=Host(\"stg.movee.jp\")"
+
+      # HTTP (80) → HTTPS にリダイレクト
+      - "traefik.http.routers.web-http.rule=Host(`stg.movee.jp`)"
       - "traefik.http.routers.web-http.entrypoints=web"
-      - "traefik.http.routers.web-http.service=web"
+      - "traefik.http.routers.web-http.middlewares=redirect-to-https"
+
+      # HTTPS 本番
+      - "traefik.http.routers.web.rule=Host(`stg.movee.jp`)"
       - "traefik.http.routers.web.entrypoints=websecure"
-      - "traefik.http.routers.web.rule=Host(\"stg.movee.jp\")"
       - "traefik.http.routers.web.tls.certresolver=myresolver"
-      - "traefik.http.services.web.loadbalancer.server.port=3000"
+      - "traefik.http.routers.web.service=web-svc"
+
+      # Service 定義
+      - "traefik.http.services.web-svc.loadbalancer.server.port=3000"
+
+      # middleware: http → https リダイレクト
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
     environment:
       - NODE_ENV=production
       - WORDPRESS_API_URL=http://wordpress:80
