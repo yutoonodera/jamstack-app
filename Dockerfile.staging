@@ -8,7 +8,8 @@ RUN apk add --no-cache curl
 # 設定ファイル類をコピー
 COPY tailwind.config.js postcss.config.js next.config.js tsconfig.json ./
 # ソースコードをコピー
-COPY . .
+COPY app ./app
+COPY src ./src
 
 ARG NEXT_PUBLIC_WORDPRESS_API_URL
 ARG NEXT_PUBLIC_TECH_CAT_ID
