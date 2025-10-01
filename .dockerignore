@@ -1,0 +1,15 @@
+# ビルド不要なディレクトリ
+node_modules
+.next
+dist
+coverage
+
+# ローカル専用
+*.log
+*.local
+*.bup
+middleware.ts-bup
+
+# Git 関連
+.git
+.gitignore
