@@ -30,8 +30,8 @@ services:
 
   wordpress:
     image: wordpress:6.6-php8.2-apache
-    ports:
-      - "8000:80"
+    # ports:
+    #   - "8000:80"
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
@@ -49,8 +49,6 @@ services:
       - "traefik.http.routers.wordpress.entrypoints=websecure"
       - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
       - "traefik.http.services.wordpress.loadbalancer.server.port=80"
-      - "traefik.http.middlewares.wordpress-header.headers.customrequestheaders.Host=wp.stg.movee.jp"
-      - "traefik.http.routers.wordpress.middlewares=wordpress-header"
     networks:
       - web
       - app-network
