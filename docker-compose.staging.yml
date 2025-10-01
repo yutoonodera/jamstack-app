@@ -8,48 +8,23 @@ services:
       args:
         NEXT_PUBLIC_WORDPRESS_API_URL: ${NEXT_PUBLIC_WORDPRESS_API_URL}
         NEXT_PUBLIC_ONODY_CAT_ID: ${NEXT_PUBLIC_ONODY_CAT_ID}
-        NEXT_PUBLIC_TECH__CAT_ID: ${NEXT_PUBLIC_TECH_CAT_ID}
-    # ports:
-    #   - "3000:3000"
+        NEXT_PUBLIC_TECH_CAT_ID: ${NEXT_PUBLIC_TECH_CAT_ID}
     env_file:
       - .env.staging
-    labels:
-      - "traefik.enable=true"
-
-      # HTTP (80) → HTTPS にリダイレクト
-      - "traefik.http.routers.web-http.rule=Host(\"stg.movee.jp\")"
-      - "traefik.http.routers.web-http.entrypoints=web"
-      - "traefik.http.routers.web-http.middlewares=redirect-to-https"
-
-      # HTTPS 本番
-      - "traefik.http.routers.web.rule=Host(\"stg.movee.jp\")"
-      - "traefik.http.routers.web.entrypoints=websecure"
-      - "traefik.http.routers.web.tls.certresolver=myresolver"
-      - "traefik.http.routers.web.service=web-svc"
-
-      # Service 定義
-      - "traefik.http.services.web-svc.loadbalancer.server.port=3000"
-
-      # middleware: http → https リダイレクト
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-
     environment:
       - NODE_ENV=production
       - WORDPRESS_API_URL=http://wordpress:80
     depends_on:
       - wordpress
     networks:
-      - web
       - app-network
 
   wordpress:
     image: wordpress:6.6-php8.2-apache
-    # ports:
-    #   - "8000:80"
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress   # とりあえず直書き
+      WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_SITEURL: https://wp.stg.movee.jp
       WORDPRESS_HOME: https://wp.stg.movee.jp
@@ -57,70 +32,45 @@ services:
       - wordpress_data:/var/www/html
     depends_on:
       - db
-    labels:
-      - "traefik.enable=true"
-
-      # HTTP (80) → HTTPS にリダイレクト
-      - "traefik.http.routers.wordpress-http.rule=Host(\"wp.stg.movee.jp\")"
-      - "traefik.http.routers.wordpress-http.entrypoints=web"
-      - "traefik.http.routers.wordpress-http.middlewares=redirect-to-https"
-
-      # HTTPS 本番
-      - "traefik.http.routers.wordpress.rule=Host(\"wp.stg.movee.jp\")"
-      - "traefik.http.routers.wordpress.entrypoints=websecure"
-      - "traefik.http.routers.wordpress.tls.certresolver=myresolver"
-      - "traefik.http.routers.wordpress.service=wp-svc"
-
-      # Service 定義
-      - "traefik.http.services.wp-svc.loadbalancer.server.port=80"
-
-      # middleware: http → https リダイレクト
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     networks:
-      - web
       - app-network
 
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword  # とりあえず直書き
+      MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress          # とりあえず直書き
+      MYSQL_PASSWORD: wordpress
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - app-network
 
-  traefik:
-    image: traefik:v2.10
-    command:
-      - "--api.insecure=true"
-      - "--api.dashboard=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedByDefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=y.onodera@movee.jp"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  https-portal:
+    image: steveltn/https-portal:1
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
+    environment:
+      DOMAINS: >
+        stg.movee.jp -> http://web:3000,
+        wp.stg.movee.jp -> http://wordpress:80
+      STAGE: staging   # ← staging のときは "staging" にすると Let's Encrypt のレート制限回避できる
+      FORCE_RENEW: "true" # 強制更新したいとき
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./letsencrypt:/letsencrypt
-    networks:
+      - https-portal-data:/var/lib/https-portal
+    depends_on:
       - web
+      - wordpress
+    networks:
+      - app-network
 
 volumes:
   wordpress_data:
   db_data:
+  https-portal-data:
 
 networks:
   app-network:
-    driver: bridge
-  web:
     driver: bridge
