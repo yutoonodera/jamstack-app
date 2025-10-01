@@ -114,7 +114,6 @@ services:
     networks:
       - web
 
-
 volumes:
   wordpress_data:
   db_data:
