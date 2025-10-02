@@ -56,8 +56,8 @@ services:
       DOMAINS: >
         stg.movee.jp -> http://web:3000,
         wp.stg.movee.jp -> http://wordpress:80
-      STAGE: staging   # ← staging のときは "staging" にすると Let's Encrypt のレート制限回避できる
-      HTTPS_METHOD: redirect
+      STAGE: production   # ← staging のときは "staging" にすると Let's Encrypt のレート制限回避できる
+      #HTTPS_METHOD: redirect #redirect入れなくてもhttpsにならないといけないがなっていない
       FORCE_RENEW: "true" # 強制更新したいとき
     volumes:
       - https-portal-data:/var/lib/https-portal
