@@ -7,6 +7,7 @@ import Header from "../components/Header";
 
 const Calendar = dynamic(() => import("react-calendar"), { ssr: false });
 import "react-calendar/dist/Calendar.css";
+import Footer from "../components/Footer";
 
 export default function OnodyLogPage() {
   const [posts, setPosts] = useState<LogPost[]>([]);
@@ -142,6 +143,7 @@ export default function OnodyLogPage() {
           )}
         </div>
       </div>
+      <Footer />
     </>
   );
 }

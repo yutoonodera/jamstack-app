@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Post, getTechPosts } from "../../app/lib/getTechPosts";
 import SearchBox from "../components/SearchBox";
 import PostCard from "../components/PostCard";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -29,6 +31,8 @@ export default function HomePage() {
   });
 
   return (
+    <>
+    <Header />
     <main className="p-6 font-sans max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">テックブログ</h1>
       <p className="text-sm text-gray-500 mb-6">
@@ -57,5 +61,7 @@ export default function HomePage() {
       )}
       </div>
     </main>
+    <Footer />
+    </>
   );
 }
