@@ -78,6 +78,9 @@ jobs:
             # 削除
             rm -rf .next
 
+            # web / wordpress だけ停止・削除
+            docker compose -f docker-compose.staging.yml --env-file .env.staging down web wordpress || true
+
             # web と wordpress を両方ビルド・再起動
             docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build web wordpress
 
