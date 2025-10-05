@@ -8,8 +8,8 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { label: "サービス", href: "/#services" },
     { label: "Attention戦略", href: "/attention-strategy" },
+    { label: "サービス", href: "/#services" },
     { label: "認知レポート", href: "/attention" },
     { label: "テックブログ", href: "/tech-blog" },
     { label: "お問い合わせ", href: "/contact" },
