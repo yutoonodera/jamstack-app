@@ -85,7 +85,7 @@ const ChurnChart = () => {
     <div className="my-8">
       <div className="overflow-x-auto">
         <div className="min-w-[600px]">
-        <Line data={data} options={options} />
+          <Line data={data} options={options} />
         </div>
       </div>
       <p className="text-xs text-gray-500 mt-2 text-center leading-relaxed">
