@@ -81,4 +81,9 @@ jobs:
             # web と wordpress を両方ビルド・再起動
             docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build web wordpress
 
+            # https-portal が動いていなければ再起動
+            if ! docker ps -a --format '{{.Names}} {{.Status}}' | grep -q 'staging-app-https-portal-1.*Up'; then
+              echo "https-portal が停止または異常のため再起動します"
+              docker compose --env-file .env.staging -f docker-compose.staging.yml up -d https-portal
+            fi
             echo "===== デプロイ完了 ====="
