@@ -78,12 +78,7 @@ jobs:
             # 削除
             rm -rf .next
 
-            # 古いコンテナを停止
-            docker compose -f docker-compose.staging.yml --env-file .env.staging down || true
-
-            # 最新イメージを取得してビルド＋起動
-            docker compose --env-file .env.staging -f docker-compose.staging.yml build --no-cache web
-            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d
-
+            # web と wordpress を両方ビルド・再起動
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build web wordpress
 
             echo "===== デプロイ完了 ====="
