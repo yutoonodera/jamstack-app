@@ -9,7 +9,7 @@ export default function Header() {
 
   const navItems = [
     { label: "サービス", href: "/#services" },
-    { label: "会社概要", href: "/about" },
+    { label: "Attention戦略", href: "/attention-strategy" },
     { label: "認知レポート", href: "/attention" },
     { label: "テックブログ", href: "/tech-blog" },
     { label: "お問い合わせ", href: "/contact" },
