@@ -3,13 +3,13 @@ export default function Footer() {
     const footerLinks: { label: string; href: string }[][] = [
       [
         { label: "会社概要", href: "/company" },
+        { label: "Attention戦略", href: "/attention-strategy" },
         { label: "サービス", href: "/#services" },
         { label: "技術ブログ", href: "/tech-blog" },
         { label: "onody-log", href: "/onody-log" },
-        { label: "お問い合わせ", href: "/contact" },
       ],
       [
-        { label: "プライベートブログ", href: "/private-blog" },
+        { label: "お問い合わせ", href: "/contact" },
         { label: "ホームページWebシステム化事業", href: "/services/web-system" },
         { label: "福岡市のカレーやさん", href: "/fukuoka-curry" },
         { label: "テーマで見る福岡開発実績", href: "/themes/fukuoka" },
