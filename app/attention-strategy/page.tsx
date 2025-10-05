@@ -11,7 +11,7 @@ export default function AttentionStrategyPage() {
       <article className="prose prose-lg mx-auto max-w-3xl px-4">
         <h1>Attention戦略</h1>
         <p className="inline-block border-b-4 border-gray-800 pb-1 font-semibold text-lg">
-  営業や広告に頼らない構造的な成長
+  営業・広告に頼らない構造的な成長のために
 </p>
         <p>
           どの企業にもチャーン率（解約率）は存在し、時間の経過とともにユーザー数は自然に減少していきます。
