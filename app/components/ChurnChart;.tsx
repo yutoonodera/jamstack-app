@@ -83,7 +83,11 @@ const ChurnChart = () => {
 
   return (
     <div className="my-8">
-      <Line data={data} options={options} />
+      <div className="overflow-x-auto">
+        <div className="min-w-[600px]">
+        <Line data={data} options={options} />
+        </div>
+      </div>
       <p className="text-xs text-gray-500 mt-2 text-center leading-relaxed">
         出典：ProfitWell, Pacific Crest, Shopify, RJMetrics, Zuora, Recurly, Localytics, Mixpanel など
         ※各業種のチャーン率は代表的な業界平均値をもとに算出（概算）
