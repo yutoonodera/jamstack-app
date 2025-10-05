@@ -57,7 +57,14 @@ const ChurnChart = () => {
     responsive: true,
     maintainAspectRatio: false, // ← 高さを調整したいとき便利
     plugins: {
-      legend: { position: "top" as const },
+      legend: {
+        position: "bottom" as const,
+        labels: {
+          font: { size: 10 }, // スマホでも見やすいサイズに
+          padding: 8,
+          boxWidth: 12,
+        },
+      },
       title: {
         display: true,
         text: "業種別：ユーザー残存数の推移（2022年＝100人）",
