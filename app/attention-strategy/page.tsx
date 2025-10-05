@@ -10,10 +10,9 @@ export default function AttentionStrategyPage() {
     <section className="my-12">
       <article className="prose prose-lg mx-auto max-w-3xl px-4">
         <h1>Attention戦略</h1>
-        <p>
-          営業や広告に頼らない、構造的な成長を実現するために
-        </p>
-
+        <p className="inline-block border-b-4 border-gray-800 pb-1 font-semibold text-lg">
+  営業や広告に頼らない、構造的な成長を実現するために
+</p>
         <p>
           どの企業にもチャーン率（解約率）は存在し、時間の経過とともにユーザー数は自然に減少していきます。
           この現実を直視したとき、企業が持続的に成長していくためには、
@@ -44,10 +43,10 @@ export default function AttentionStrategyPage() {
           ことを目的としています。これにより、企業は長期的かつ安定的な顧客基盤の拡大を実現できます。
         </p>
 
-        <h3>1. ソフトウェア改善と「間借り型」ページによる自然な露出の拡大</h3>
+        <h3>1. ソフトウェア強化と「間借り型」ページによる自然な露出の拡大</h3>
 
         <p>
-          まず、受託開発によるソフトウェア改善を通じて、企業の魅力や強みを適切に可視化し、
+          まず、ソフトウェア強化を通じて、企業の魅力や強みを適切に可視化し、
           検索・SNS・口コミなどから自然に見つけてもらえる状態を整えます。
         </p>
 
