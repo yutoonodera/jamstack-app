@@ -3,7 +3,7 @@ export default function Footer() {
     const footerLinks: { label: string; href: string }[][] = [
       [
         { label: "会社概要", href: "/company" },
-        { label: "Attention戦略", href: "/attention-strategy" },
+        { label: "はじまりをつくる", href: "/make-start" },
         { label: "サービス", href: "/#services" },
         { label: "技術ブログ", href: "/tech-blog" },
         { label: "onody-log", href: "/onody-log" },

@@ -8,7 +8,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { label: "Attention戦略", href: "/attention-strategy" },
+    { label: "はじまりをつくる", href: "/make-start" },
     { label: "サービス", href: "/#services" },
     { label: "認知レポート", href: "/attention" },
     { label: "テックブログ", href: "/tech-blog" },
