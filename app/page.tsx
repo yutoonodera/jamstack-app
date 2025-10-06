@@ -4,10 +4,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import PostsChart from "./components/PostsChart";
 import ContactSection from "./components/ContactSection";
-import AisasChart from "./components/AisasChart";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import ChurnChart from "./components/ChurnChart;";
+import ChurnChart from "./components/ChurnChart";
 
 export default function HomePage() {
   const services = [
@@ -18,7 +17,7 @@ export default function HomePage() {
     },
     {
       title: "間借り",
-      description: "弊社サイトのサーバ・システムを'間借り'するサービスです。",
+      description: "弊社サイトのサーバ・システムを“間借り”するサービスです。",
       href: "/services/magari",
     },
     {
@@ -30,41 +29,69 @@ export default function HomePage() {
 
   return (
     <>
-    <Header />
-    <main className="p-6 font-sans">
-      {/* 事業紹介 */}
-      <h1 className="text-2xl font-bold mb-4">AISASモデルの可視化（出典: Li, H., & Pan, Y. (2023)</h1>
-      <AisasChart />
-      <ChurnChart />
-      <section id="services" className="mt-12">
-        <h2 className="text-2xl font-semibold mb-6">事業内容</h2>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {services.map((service, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              viewport={{ once: true, amount: 0.2 }}
-              className="p-6 border rounded-2xl shadow-sm bg-white"
+      <Header />
+      <main className="p-6 font-sans">
+        {/* Top section */}
+        <section className="max-w-4xl mx-auto text-center mb-20">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+            なぜ「はじまり」が重要なのか
+          </h2>
+          <p className="text-gray-700 mb-8 leading-relaxed text-base sm:text-lg">
+            どの企業にもチャーン率（解約率）は存在し、時間とともにユーザーは自然と減少していきます。
+            成長を続けるためには、営業や広告に頼らない構造的な認知拡大が欠かせません。
+          </p>
+
+          {/* グラフ */}
+          <div className="h-56 sm:h-64 mb-14"> {/* ← mb-10 → mb-14 に増やした */}
+            <ChurnChart />
+          </div>
+
+          {/* リンク */}
+          <div className="mt-40"> {/* ← mt-6 → mt-10 に増やした */}
+            <Link
+              href="/make-start"
+              className="inline-block text-blue-600 font-medium hover:underline text-sm sm:text-base"
             >
-              <h3 className="text-xl font-bold mb-2">{service.title}</h3>
-              <p className="text-gray-600 mb-4">{service.description}</p>
-              <Link
-                href={service.href}
-                className="text-blue-600 font-medium hover:underline"
+              "はじまり"をつくるついて詳しく見る →
+            </Link>
+          </div>
+        </section>
+
+        {/* Services section */}
+        <section id="services" className="max-w-6xl mx-auto mt-12 sm:mt-20">
+          <h2 className="text-2xl sm:text-3xl font-semibold mb-8 text-center">
+            事業内容
+          </h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((service, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true, amount: 0.2 }}
+                className="p-6 border rounded-2xl shadow-sm bg-white hover:shadow-md transition-shadow"
               >
-                詳しく見る →
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-      <ContactSection />
-      {/* 投稿グラフ */}
-      <PostsChart />
-    </main>
-    <Footer />
-   </>
+                <h3 className="text-xl font-bold mb-2">{service.title}</h3>
+                <p className="text-gray-600 mb-4">{service.description}</p>
+                <Link
+                  href={service.href}
+                  className="text-blue-600 font-medium hover:underline"
+                >
+                  詳しく見る →
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* その他セクション */}
+        <section className="mt-20">
+          <ContactSection />
+          <PostsChart />
+        </section>
+      </main>
+      <Footer />
+    </>
   );
 }
