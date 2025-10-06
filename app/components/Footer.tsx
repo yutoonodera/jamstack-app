@@ -2,7 +2,7 @@
 export default function Footer() {
     const footerLinks: { label: string; href: string }[][] = [
       [
-        { label: "会社概要", href: "/company" },
+        { label: "株式会社movee", href: "/" },
         { label: "はじまりをつくる", href: "/make-start" },
         { label: "サービス", href: "/#services" },
         { label: "技術ブログ", href: "/tech-blog" },
