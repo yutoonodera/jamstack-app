@@ -8,9 +8,7 @@ services:
       args:
         NEXT_PUBLIC_WORDPRESS_API_URL: ${NEXT_PUBLIC_WORDPRESS_API_URL}
         NEXT_PUBLIC_ONODY_CAT_ID: ${NEXT_PUBLIC_ONODY_CAT_ID}
-        NEXT_PUBLIC_TECH__CAT_ID: ${NEXT_PUBLIC_TECH_CAT_ID}
-    ports:
-      - "3000:3000"
+        NEXT_PUBLIC_TECH_CAT_ID: ${NEXT_PUBLIC_TECH_CAT_ID}
     env_file:
       - .env.staging
     environment:
@@ -23,13 +21,13 @@ services:
 
   wordpress:
     image: wordpress:6.6-php8.2-apache
-    ports:
-      - "8000:80"
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress   # とりあえず直書き
+      WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_SITEURL: https://wp.stg.movee.jp
+      WORDPRESS_HOME: https://wp.stg.movee.jp
     volumes:
       - wordpress_data:/var/www/html
     depends_on:
@@ -40,18 +38,39 @@ services:
   db:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword  # とりあえず直書き
+      MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress          # とりあえず直書き
+      MYSQL_PASSWORD: wordpress
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  https-portal:
+    image: steveltn/https-portal:1
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAINS: >
+        stg.movee.jp -> http://web:3000,
+        wp.stg.movee.jp -> http://wordpress:80
+      STAGE: production   # ← staging のときは "staging" にすると Let's Encrypt のレート制限回避できる
+      HTTPS_METHOD: redirect #redirect入れなくてもhttpsにならないといけないがなっていない
+      FORCE_RENEW: "true" # 強制更新したいとき
+    volumes:
+      - https-portal-data:/var/lib/https-portal
+    depends_on:
+      - web
+      - wordpress
     networks:
       - app-network
 
 volumes:
   wordpress_data:
   db_data:
+  https-portal-data:
 
 networks:
   app-network:

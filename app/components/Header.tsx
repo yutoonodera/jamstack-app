@@ -8,8 +8,9 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { label: "サービス", href: "/services" },
-    { label: "会社概要", href: "/about" },
+    { label: "はじまりをつくる", href: "/make-start" },
+    { label: "サービス", href: "/#services" },
+    { label: "認知レポート", href: "/attention" },
     { label: "テックブログ", href: "/tech-blog" },
     { label: "お問い合わせ", href: "/contact" },
   ];
@@ -19,7 +20,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* ロゴ */}
         <div className="text-xl font-bold">
-          <Link href="/">Onody</Link>
+          <Link href="/">株式会社movee</Link>
         </div>
 
         {/* PCナビ */}

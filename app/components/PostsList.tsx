@@ -24,7 +24,7 @@ export default function PostsList() {
 
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-bold mb-6">他の記事</h2>
+      <h2 className="text-2xl font-bold mb-6">記事一覧</h2>
 
       {/* 投稿リスト */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

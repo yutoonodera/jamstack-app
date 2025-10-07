@@ -15,7 +15,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const AisasChart = () => {
   const data = {
-    labels: ["Attention", "Interest", "Search", "Action", "Share"],
+    labels: ["認知", "興味", "検索", "行動", "共有"],
     datasets: [
       {
         label: "各段階の影響度",

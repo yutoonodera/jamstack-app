@@ -3,6 +3,8 @@ export const revalidate = 60;  // 60秒ごとに再検証
 import { getPost } from "../../lib/getPost";
 import PostsList from "../../components/PostsList";
 import ContactSection from "../../components/ContactSection";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 type Props = {
   params: { slug: string };
@@ -13,6 +15,8 @@ export default async function PostPage({ params }: Props) {
   if (!post) return <div>記事が見つかりません</div>;
 
   return (
+    <>
+    <Header />
     <main className="p-6 font-sans max-w-4xl mx-auto">
       <div className="bg-white border rounded-2xl shadow-md p-8 mb-12">
         <h1
@@ -28,5 +32,7 @@ export default async function PostPage({ params }: Props) {
       {/* 他の記事リストを下に表示 */}
       <PostsList />
     </main>
+    <Footer />
+    </>
   );
 }
