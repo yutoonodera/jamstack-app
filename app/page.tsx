@@ -13,7 +13,7 @@ export default function HomePage() {
     {
       title: "ソフトウェア開発",
       description: "最新技術を活用し、お客様の課題を解決するソフトウェアを開発します。",
-      href: "/services/development",
+      href: "/services/software",
     },
     {
       title: "間借り",
@@ -21,9 +21,9 @@ export default function HomePage() {
       href: "/services/magari",
     },
     {
-      title: "その他",
+      title: "メール送信代行",
       description: "どんな内容でもご相談ください。",
-      href: "/services/others",
+      href: "/services/mail",
     },
   ];
 
