@@ -4,23 +4,16 @@ export default function Footer() {
       [
         { label: "株式会社movee", href: "/" },
         { label: "はじまりをつくる", href: "/make-start" },
-        { label: "サービス", href: "/#services" },
+      ],
+      [
+        { label: "ソフトウェア開発", href: "/services/software" },
+        { label: "間借り", href: "/services/magari" },
+        { label: "メール送信代行", href: "/services/mail" },
+      ],
+      [
         { label: "技術ブログ", href: "/tech-blog" },
         { label: "onody-log", href: "/onody-log" },
-      ],
-      [
         { label: "お問い合わせ", href: "/contact" },
-        { label: "ホームページWebシステム化事業", href: "/services/web-system" },
-        { label: "福岡市のカレーやさん", href: "/fukuoka-curry" },
-        { label: "テーマで見る福岡開発実績", href: "/themes/fukuoka" },
-        { label: "MOC開発", href: "/moc" },
-      ],
-      [
-        { label: "イギリスの一面と政策対話", href: "/uk-policy" },
-        { label: "1時間業務参加", href: "/one-hour" },
-        { label: "福岡市の子育ての未来を共創", href: "/fukuoka-future" },
-        { label: "サウルスプロース社日本語版のホームページ", href: "/saulus-jp" },
-        { label: "開発の哲学", href: "/philosophy" },
       ],
     ];
 

@@ -10,7 +10,6 @@ export default function Header() {
   const navItems = [
     { label: "はじまりをつくる", href: "/make-start" },
     { label: "サービス", href: "/#services" },
-    { label: "認知レポート", href: "/attention" },
     { label: "テックブログ", href: "/tech-blog" },
     { label: "お問い合わせ", href: "/contact" },
   ];
