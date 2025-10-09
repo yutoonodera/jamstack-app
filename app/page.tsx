@@ -7,25 +7,26 @@ import ContactSection from "./components/ContactSection";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ChurnChart from "./components/ChurnChart";
+import SoftwareHubSection from "./components/SoftwareHubSection";
 
 export default function HomePage() {
-  const services = [
-    {
-      title: "ソフトウェア開発",
-      description: "最新技術を活用し、お客様の課題を解決するソフトウェアを開発します。",
-      href: "/services/software",
-    },
-    {
-      title: "間借り",
-      description: "弊社サイトのサーバ・システムを“間借り”するサービスです。",
-      href: "/services/magari",
-    },
-    {
-      title: "メール送信代行",
-      description: "どんな内容でもご相談ください。",
-      href: "/services/mail",
-    },
-  ];
+  // const services = [
+  //   {
+  //     title: "ソフトウェア開発",
+  //     description: "最新技術を活用し、お客様の課題を解決するソフトウェアを開発します。",
+  //     href: "/services/software",
+  //   },
+  //   {
+  //     title: "間借り",
+  //     description: "弊社サイトのサーバ・システムを“間借り”するサービスです。",
+  //     href: "/services/magari",
+  //   },
+  //   {
+  //     title: "メール送信代行",
+  //     description: "どんな内容でもご相談ください。",
+  //     href: "/services/mail",
+  //   },
+  // ];
 
   return (
     <>
@@ -56,33 +57,8 @@ export default function HomePage() {
             </Link>
           </div>
         </section>
-
-        {/* Services section */}
-        <section id="services" className="max-w-6xl mx-auto mt-12 sm:mt-20">
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-8 text-center">
-            事業内容
-          </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true, amount: 0.2 }}
-                className="p-6 border rounded-2xl shadow-sm bg-white hover:shadow-md transition-shadow"
-              >
-                <h3 className="text-xl font-bold mb-2">{service.title}</h3>
-                <p className="text-gray-600 mb-4">{service.description}</p>
-                <Link
-                  href={service.href}
-                  className="text-blue-600 font-medium hover:underline"
-                >
-                  詳しく見る →
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+        <section id="services">
+        <SoftwareHubSection />
         </section>
 
         {/* その他セクション */}
