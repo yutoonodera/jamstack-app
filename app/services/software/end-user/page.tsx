@@ -190,21 +190,29 @@ export default function SoftwareIntroPage() {
             </div>
           </div>
         </section>
-
         {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-10 text-white shadow-md"
-        >
-          <h2 className="text-xl md:text-2xl font-bold mb-3">まずはご相談ください</h2>
-          <p className="mb-8 text-sm md:text-base font-light">
-            アイデア段階でもOKです。お気軽にご連絡ください。
-          </p>
-          <ContactSection />
-        </motion.div>
+        <section className="mt-20">
+          <div className="rounded-2xl border bg-blue-50 p-8 text-center">
+            <p className="text-base text-gray-700 max-w-2xl mx-auto">
+              実現方法はいっしょに考えながら決めていければと思います。<br/>
+              まずはお気軽にご相談ください。
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <a
+                href="/contact"
+                className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+              >
+                お問い合わせ
+              </a>
+              <a
+                href="mailto:info@movee.jp"
+                className="rounded-xl border border-blue-200 px-5 py-2.5 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
+              >
+                info@movee.jp にメール
+              </a>
+            </div>
+          </div>
+        </section>
         <SoftwareHubSection />
       </div>
       <Footer />
