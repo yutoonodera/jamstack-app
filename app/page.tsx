@@ -105,7 +105,6 @@ export default function HomePage() {
     開発の裏側、日々の気づき、思考の断片。
     moveeの“中の人”がふと書き残したメモのような場所です。
   </p>
-
   {/* リンクリスト（常に縦並び） */}
   <div className="flex flex-col items-center gap-6">
     {/* onody-log */}
