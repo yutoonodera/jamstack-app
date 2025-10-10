@@ -95,52 +95,46 @@ export default function HomePage() {
           <PostsChart />
         </section>
         <section className="mt-24 text-center">
-  <h2 className="text-xl sm:text-2xl font-bold mb-4 flex justify-center items-center gap-2">
-    🧠 マニアックなページ
-  </h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 flex justify-center items-center gap-2">
+          🧠 マニアックなページ
+        </h2>
 
-  <p className="text-gray-600 text-sm sm:text-base mb-10 max-w-2xl mx-auto leading-relaxed">
-    開発の裏側、日々の気づき、思考の断片。
-    moveeの“中の人”がふと書き残したメモのような場所です。
-  </p>
-
-  {/* リンクリスト（左揃え） */}
-  <div className="flex flex-col items-center space-y-4">
-    <div className="flex items-start gap-3 max-w-md">
-      <span className="text-xl mt-0.5">📔</span>
-      <div>
-        <Link
-          href="/onody-log"
-          className="text-blue-600 font-medium hover:underline"
-        >
-          onody-log（日記）
-        </Link>
-        <p className="text-gray-500 text-sm mt-0.5">
-          個人的な記録や考察など
+        <p className="text-gray-600 text-sm sm:text-base mb-10 max-w-2xl mx-auto leading-relaxed">
+          開発の裏側、日々の気づき、思考の断片。
+          moveeの“中の人”がふと書き残したメモのような場所です。
         </p>
-      </div>
-    </div>
 
-    <div className="flex items-start gap-3 max-w-md">
-      <span className="text-xl mt-0.5">🧩</span>
-      <div>
-        <Link
-          href="/tech-blog"
-          className="text-blue-600 font-medium hover:underline"
-        >
-          テックブログ
-        </Link>
-        <p className="text-gray-500 text-sm mt-0.5">
-          技術検証や実験的な投稿
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
+        {/* リンクリスト */}
+        <div className="flex flex-col items-center space-y-6 sm:space-y-4">
+          {/* onody-log */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 max-w-md w-full sm:w-auto">
+            <span className="text-2xl">📔</span>
+            <div className="text-center sm:text-left">
+              <Link
+                href="/onody-log"
+                className="text-blue-600 font-medium hover:underline"
+              >
+                onody-log（日記）
+              </Link>
+              <p className="text-gray-500 text-sm mt-1">個人的な記録や考察など</p>
+            </div>
+          </div>
 
-
-
-
+          {/* テックブログ */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 max-w-md w-full sm:w-auto">
+            <span className="text-2xl">🧩</span>
+            <div className="text-center sm:text-left">
+              <Link
+                href="/tech-blog"
+                className="text-blue-600 font-medium hover:underline"
+              >
+                テックブログ
+              </Link>
+              <p className="text-gray-500 text-sm mt-1">技術検証や実験的な投稿</p>
+            </div>
+          </div>
+        </div>
+      </section>
       </main>
       <Footer />
     </>
