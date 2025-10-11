@@ -1,9 +1,6 @@
 version: "3.9"
 
 services:
-  # ============================
-  # Next.js Web アプリ
-  # ============================
   web:
     container_name: web-${DEPLOY_COLOR}
     build:
@@ -23,9 +20,6 @@ services:
     networks:
       - app-network
 
-  # ============================
-  # WordPress（APIサーバ）
-  # ============================
   wordpress:
     container_name: wordpress-${DEPLOY_COLOR}
     image: wordpress:6.6-php8.2-apache
@@ -43,9 +37,6 @@ services:
     networks:
       - app-network
 
-  # ============================
-  # MySQL（WordPress用DB）
-  # ============================
   db:
     container_name: db-${DEPLOY_COLOR}
     image: mysql:8.0
@@ -60,9 +51,6 @@ services:
     networks:
       - app-network
 
-  # ============================
-  # HTTPS-PORTAL（共通1つのみ稼働）
-  # ============================
   https-portal:
     container_name: https-portal
     image: steveltn/https-portal:1
@@ -70,24 +58,20 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      # 👇 DEPLOY_COLOR で動的に切り替わる
       DOMAINS: >
         stg.movee.jp -> http://web-${DEPLOY_COLOR}:3000,
         wp.stg.movee.jp -> http://wordpress-${DEPLOY_COLOR}:80
-      STAGE: ${STAGE:-staging}      # テストCAを使用（制限回避）
+      STAGE: ${STAGE:-staging}
       HTTPS_METHOD: redirect
       FORCE_RENEW: "false"
     volumes:
       - https-portal-data:/var/lib/https-portal
     depends_on:
-      - web-${DEPLOY_COLOR}
-      - wordpress-${DEPLOY_COLOR}
+      - web
+      - wordpress
     networks:
       - app-network
 
-# ============================
-# ボリューム定義
-# ============================
 volumes:
   wordpress_data_blue:
   wordpress_data_green:
@@ -95,9 +79,6 @@ volumes:
   db_data_green:
   https-portal-data:
 
-# ============================
-# ネットワーク定義
-# ============================
 networks:
   app-network:
     driver: bridge
