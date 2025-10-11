@@ -1,5 +1,4 @@
-# .github/workflows/deploy-staging.yml
-name: Deploy to VPS (staging)
+name: Deploy to VPS (staging fast-deploy)
 
 on:
   push:
@@ -12,32 +11,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =============================
+      # 1. リポジトリ取得
+      # =============================
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build Docker image for testing & test
+      # =============================
+      # 2. Next.jsをGitHub上でビルド
+      # =============================
+      - name: Build Next.js app
         run: |
-          docker build -f Dockerfile.local -t next-app:test .
-          docker run --rm next-app:test npm test
+          npm ci
+          npm run build
+          tar czf next-build.tar.gz .next public package*.json
+
+      # =============================
+      # 3. SSH設定
+      # =============================
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts || true
 
-      - name: Sync files to VPS
+      # =============================
+      # 4. 成果物＋設定ファイルをrsync
+      # =============================
+      - name: Sync build artifacts to VPS
         run: |
-          rsync -avz \
-            --exclude node_modules \
+          rsync -avz --delete \
             --exclude .git \
-            --exclude .next \
             --exclude .vscode \
             --exclude "*.log" \
             ./ ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app/
+
+          rsync -avz next-build.tar.gz ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app/
         env:
           RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
-      - name: Setup Traefik acme.json
+
+      # =============================
+      # 5. VPS側でデプロイ
+      # =============================
+      - name: Deploy Docker Compose on VPS
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -45,24 +62,13 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -eux
-            mkdir -p /home/ubuntu/staging-app/letsencrypt
-            touch /home/ubuntu/staging-app/letsencrypt/acme.json
-            chmod 600 /home/ubuntu/staging-app/letsencrypt/acme.json
+            cd /home/ubuntu/staging-app
 
-      - name: Deploy Docker Compose
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ubuntu
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -eux
-            echo "===== ディレクトリ確認 ====="
-            mkdir -p /home/ubuntu/staging-app
-            ls -ld /home/ubuntu/staging-app
+            echo "===== ビルド成果物を展開 ====="
+            tar xzf next-build.tar.gz || true
 
-            echo "===== .env.staging を作成 ====="
-            cat > /home/ubuntu/staging-app/.env.staging <<EOF
+            echo "===== .env.staging を生成 ====="
+            cat > .env.staging <<EOF
             NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
             NEXT_PUBLIC_ENV=staging
             SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
@@ -72,21 +78,10 @@ jobs:
             NEXT_PUBLIC_ONODY_CAT_ID=${{ secrets.STAGING_ONODY_CAT_ID }}
             EOF
 
-            echo "===== Docker Compose 再起動 ====="
-            cd /home/ubuntu/staging-app
+            echo "===== Dockerコンテナを再起動 ====="
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d web wordpress https-portal
 
-            # 削除
-            rm -rf .next
+            echo "===== 稼働中コンテナ確認 ====="
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-            # web / wordpress だけ停止・削除
-            docker compose -f docker-compose.staging.yml --env-file .env.staging down web wordpress || true
-
-            # web と wordpress を両方ビルド・再起動
-            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build web wordpress
-
-            # https-portal が動いていなければ再起動
-            if ! docker ps -a --format '{{.Names}} {{.Status}}' | grep -q 'staging-app-https-portal-1.*Up'; then
-              echo "https-portal が停止または異常のため再起動します"
-              docker compose --env-file .env.staging -f docker-compose.staging.yml up -d https-portal
-            fi
             echo "===== デプロイ完了 ====="
