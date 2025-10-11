@@ -2,7 +2,6 @@ version: "3.9"
 
 services:
   web:
-    container_name: web-${DEPLOY_COLOR}
     build:
       context: .
       dockerfile: Dockerfile.staging
@@ -14,59 +13,54 @@ services:
       - .env.staging
     environment:
       - NODE_ENV=production
-      - WORDPRESS_API_URL=http://wordpress-${DEPLOY_COLOR}:80
+      - WORDPRESS_API_URL=http://wordpress:80
     depends_on:
       - wordpress
     networks:
       - app-network
 
   wordpress:
-    container_name: wordpress-${DEPLOY_COLOR}
     image: wordpress:6.6-php8.2-apache
     environment:
-      WORDPRESS_DB_HOST: db-${DEPLOY_COLOR}
+      WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_SITEURL: https://wp.stg.movee.jp
       WORDPRESS_HOME: https://wp.stg.movee.jp
     volumes:
-      - wordpress_data_${DEPLOY_COLOR}:/var/www/html
+      - wordpress_data:/var/www/html
     depends_on:
       - db
     networks:
       - app-network
 
   db:
-    container_name: db-${DEPLOY_COLOR}
     image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: wordpress
     volumes:
-      - db_data_${DEPLOY_COLOR}:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
       - app-network
 
   https-portal:
-    container_name: https-portal
     image: steveltn/https-portal:1
     ports:
       - "80:80"
       - "443:443"
     environment:
       DOMAINS: >
-        stg.movee.jp -> http://web-${DEPLOY_COLOR}:3000,
-        wp.stg.movee.jp -> http://wordpress-${DEPLOY_COLOR}:80
-      STAGE: ${STAGE:-staging}   # ← 環境に応じて production/staging 切替
-      HTTPS_METHOD: redirect
-      FORCE_RENEW: "false"
+        stg.movee.jp -> http://web:3000,
+        wp.stg.movee.jp -> http://wordpress:80
+      STAGE: staging   # ← staging のときは "staging" にすると Let's Encrypt のレート制限回避できる
+      HTTPS_METHOD: redirect #redirect入れなくてもhttpsにならないといけないがなっていない
+      FORCE_RENEW: "true" # 強制更新したいとき
     volumes:
-      - https-certs:/var/lib/https-portal/certs
-      - https-nginx:/var/lib/https-portal/nginx
+      - https-portal-data:/var/lib/https-portal
     depends_on:
       - web
       - wordpress
@@ -74,12 +68,9 @@ services:
       - app-network
 
 volumes:
-  wordpress_data_blue:
-  wordpress_data_green:
-  db_data_blue:
-  db_data_green:
-  https-certs:     # 証明書保存用
-  https-nginx:     # Nginx設定（都度再構築される）
+  wordpress_data:
+  db_data:
+  https-portal-data:
 
 networks:
   app-network:
