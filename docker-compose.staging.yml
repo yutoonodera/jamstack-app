@@ -70,19 +70,18 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      # 初回は blue を有効化
-      # GitHub Actions から domains.conf が書き換えられ、green へ切り替えられる
+      # 👇 DEPLOY_COLOR で動的に切り替わる
       DOMAINS: >
-        stg.movee.jp -> http://web-blue:3000,
-        wp.stg.movee.jp -> http://wordpress-blue:80
-      STAGE: staging         # "staging" にすると Let's Encrypt のテストCAを使用
-      HTTPS_METHOD: redirect    # HTTP を自動で HTTPS にリダイレクト
-      FORCE_RENEW: "false"      # 証明書の強制再発行は無効
+        stg.movee.jp -> http://web-${DEPLOY_COLOR}:3000,
+        wp.stg.movee.jp -> http://wordpress-${DEPLOY_COLOR}:80
+      STAGE: ${STAGE:-staging}      # テストCAを使用（制限回避）
+      HTTPS_METHOD: redirect
+      FORCE_RENEW: "false"
     volumes:
       - https-portal-data:/var/lib/https-portal
     depends_on:
-      - web
-      - wordpress
+      - web-${DEPLOY_COLOR}
+      - wordpress-${DEPLOY_COLOR}
     networks:
       - app-network
 
