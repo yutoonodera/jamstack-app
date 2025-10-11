@@ -1,5 +1,4 @@
-# .github/workflows/deploy-staging.yml
-name: Deploy to VPS (staging)
+name: Deploy to VPS (staging blue-green auto)
 
 on:
   push:
@@ -19,6 +18,7 @@ jobs:
         run: |
           docker build -f Dockerfile.local -t next-app:test .
           docker run --rm next-app:test npm test
+
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -26,7 +26,33 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Sync files to VPS
+      # =============================
+      # 現在の環境確認 or 初回構築判定
+      # =============================
+      - name: Determine target color (blue or green)
+        id: color
+        run: |
+          ACTIVE=$(ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.VPS_HOST }} "docker ps --format '{{.Names}}' | grep web-blue || true")
+          BLUE_DIR=$(ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.VPS_HOST }} "test -d /home/ubuntu/staging-app-blue && echo 1 || echo 0")
+          GREEN_DIR=$(ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.VPS_HOST }} "test -d /home/ubuntu/staging-app-green && echo 1 || echo 0")
+
+          if [ "$BLUE_DIR" = "0" ] && [ "$GREEN_DIR" = "0" ]; then
+            echo "初回デプロイ: blueを構築します"
+            echo "color=blue" >> $GITHUB_OUTPUT
+          elif [ -z "$ACTIVE" ]; then
+            echo "現在blueが停止中なので、次はblueへデプロイ"
+            echo "color=blue" >> $GITHUB_OUTPUT
+          else
+            echo "現在blueが稼働中なので、次はgreenへデプロイ"
+            echo "color=green" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Deploy color: ${{ steps.color.outputs.color }}"
+
+      # =============================
+      # ファイル同期
+      # =============================
+      - name: Sync files to target environment
         run: |
           rsync -avz \
             --exclude node_modules \
@@ -34,10 +60,14 @@ jobs:
             --exclude .next \
             --exclude .vscode \
             --exclude "*.log" \
-            ./ ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app/
+            ./ ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app-${{ steps.color.outputs.color }}/
         env:
           RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
-      - name: Setup Traefik acme.json
+
+      # =============================
+      # デプロイ処理
+      # =============================
+      - name: Deploy Docker Compose on target color
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -45,24 +75,15 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -eux
-            mkdir -p /home/ubuntu/staging-app/letsencrypt
-            touch /home/ubuntu/staging-app/letsencrypt/acme.json
-            chmod 600 /home/ubuntu/staging-app/letsencrypt/acme.json
+            COLOR=${{ steps.color.outputs.color }}
+            APP_DIR=/home/ubuntu/staging-app-$COLOR
 
-      - name: Deploy Docker Compose
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ubuntu
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -eux
-            echo "===== ディレクトリ確認 ====="
-            mkdir -p /home/ubuntu/staging-app
-            ls -ld /home/ubuntu/staging-app
+            mkdir -p $APP_DIR
+            cd $APP_DIR
 
-            echo "===== .env.staging を作成 ====="
-            cat > /home/ubuntu/staging-app/.env.staging <<EOF
+            echo "===== 環境変数ファイル作成 ====="
+            cat > .env.staging <<EOF
+            DEPLOY_COLOR=$COLOR
             NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
             NEXT_PUBLIC_ENV=staging
             SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
@@ -72,21 +93,54 @@ jobs:
             NEXT_PUBLIC_ONODY_CAT_ID=${{ secrets.STAGING_ONODY_CAT_ID }}
             EOF
 
-            echo "===== Docker Compose 再起動 ====="
-            cd /home/ubuntu/staging-app
+            echo "===== Docker Compose起動 ====="
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build web wordpress db
 
-            # 削除
-            rm -rf .next
+            echo "===== 稼働確認 ====="
+            sleep 10
+            docker ps
 
-            # web / wordpress だけ停止・削除
-            docker compose -f docker-compose.staging.yml --env-file .env.staging down web wordpress || true
+      # =============================
+      # https-portal初回 or 切替処理
+      # =============================
+      - name: Setup or switch https-portal
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -eux
+            COLOR=${{ steps.color.outputs.color }}
 
-            # web と wordpress を両方ビルド・再起動
-            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build web wordpress
-
-            # https-portal が動いていなければ再起動
-            if ! docker ps -a --format '{{.Names}} {{.Status}}' | grep -q 'staging-app-https-portal-1.*Up'; then
-              echo "https-portal が停止または異常のため再起動します"
-              docker compose --env-file .env.staging -f docker-compose.staging.yml up -d https-portal
+            # 初回: https-portalが存在しなければ作成
+            if ! docker ps -a --format '{{.Names}}' | grep -q 'https-portal'; then
+              echo "===== 初回: https-portalを起動 ====="
+              docker compose -f /home/ubuntu/staging-app-$COLOR/docker-compose.staging.yml up -d https-portal
+            else
+              echo "===== 切り替え: $COLOR を有効化 ====="
+              docker exec -i https-portal sed -i "s/web-blue/web-${COLOR}/g" /var/lib/https-portal/domains.conf || true
+              docker exec -i https-portal sed -i "s/wordpress-blue/wordpress-${COLOR}/g" /var/lib/https-portal/domains.conf || true
+              docker restart https-portal
             fi
+
+      # =============================
+      # 古い環境を停止（存在する場合のみ）
+      # =============================
+      - name: Cleanup old environment
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -eux
+            OLD_COLOR=$( [ "${{ steps.color.outputs.color }}" = "blue" ] && echo "green" || echo "blue" )
+            if [ -d "/home/ubuntu/staging-app-$OLD_COLOR" ]; then
+              echo "===== 古い環境 ($OLD_COLOR) を停止 ====="
+              docker compose -f /home/ubuntu/staging-app-$OLD_COLOR/docker-compose.staging.yml --env-file /home/ubuntu/staging-app-$OLD_COLOR/.env.staging down || true
+            else
+              echo "旧環境なし: skip"
+            fi
+
             echo "===== デプロイ完了 ====="
