@@ -117,6 +117,7 @@ jobs:
             # 初回: https-portalが存在しなければ作成
             if ! docker ps -a --format '{{.Names}}' | grep -q 'https-portal'; then
               echo "===== 初回: https-portalを起動 ====="
+              DEPLOY_COLOR=$COLOR \
               docker compose -f /home/ubuntu/staging-app-$COLOR/docker-compose.staging.yml up -d https-portal
             else
               echo "===== 切り替え: $COLOR を有効化 ====="
