@@ -12,13 +12,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =============================
+      # コード取得
+      # =============================
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # =============================
+      # ローカルでテスト（軽量）
+      # =============================
       - name: Build Docker image for testing & test
         run: |
           docker build -f Dockerfile.local -t next-app:test .
           docker run --rm next-app:test npm test
+
+      # =============================
+      # SSH設定
+      # =============================
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -26,6 +36,9 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
+      # =============================
+      # ファイル同期
+      # =============================
       - name: Sync files to VPS
         run: |
           rsync -avz \
@@ -37,6 +50,10 @@ jobs:
             ./ ubuntu@${{ secrets.VPS_HOST }}:/home/ubuntu/staging-app/
         env:
           RSYNC_RSH: "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
+
+      # =============================
+      # acme.json（Traefikなどの証明書）セットアップ
+      # =============================
       - name: Setup Traefik acme.json
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -49,7 +66,10 @@ jobs:
             touch /home/ubuntu/staging-app/letsencrypt/acme.json
             chmod 600 /home/ubuntu/staging-app/letsencrypt/acme.json
 
-      - name: Deploy Docker Compose
+      # =============================
+      # デプロイ実行
+      # =============================
+      - name: Deploy Docker Compose (no-down, safe restart)
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -57,12 +77,14 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -eux
+
             echo "===== ディレクトリ確認 ====="
             mkdir -p /home/ubuntu/staging-app
+            cd /home/ubuntu/staging-app
             ls -ld /home/ubuntu/staging-app
 
-            echo "===== .env.staging を作成 ====="
-            cat > /home/ubuntu/staging-app/.env.staging <<EOF
+            echo "===== .env.staging を再生成 ====="
+            cat > .env.staging <<EOF
             NEXT_PUBLIC_WORDPRESS_API_URL=${{ secrets.STAGING_WP_URL }}
             NEXT_PUBLIC_ENV=staging
             SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
@@ -72,21 +94,30 @@ jobs:
             NEXT_PUBLIC_ONODY_CAT_ID=${{ secrets.STAGING_ONODY_CAT_ID }}
             EOF
 
-            echo "===== Docker Compose 再起動 ====="
-            cd /home/ubuntu/staging-app
-
-            # 削除
+            echo "===== キャッシュ削除 (.next) ====="
             rm -rf .next
 
-            # web / wordpress だけ停止・削除
-            docker compose -f docker-compose.staging.yml --env-file .env.staging down web wordpress || true
+            echo "===== web / wordpress を安全に停止・削除 ====="
+            docker compose -f docker-compose.staging.yml --env-file .env.staging stop web wordpress || true
+            docker compose -f docker-compose.staging.yml --env-file .env.staging rm -f web wordpress || true
 
-            # web と wordpress を両方ビルド・再起動
-            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build web wordpress
+            echo "===== web / wordpress を再ビルド ====="
+            docker compose --env-file .env.staging -f docker-compose.staging.yml build web wordpress
 
-            # https-portal が動いていなければ再起動
-            if ! docker ps -a --format '{{.Names}} {{.Status}}' | grep -q 'staging-app-https-portal-1.*Up'; then
+            echo "===== WordPressを先に再起動 ====="
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --no-deps --force-recreate wordpress
+
+            echo "===== Next.js (web) を再起動 ====="
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --no-deps --build --force-recreate web
+
+            echo "===== 起動確認 ====="
+            sleep 5
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+            echo "===== https-portal が落ちていれば再起動 ====="
+            if ! docker ps -a --format '{{.Names}} {{.Status}}' | grep -q 'https-portal.*Up'; then
               echo "https-portal が停止または異常のため再起動します"
               docker compose --env-file .env.staging -f docker-compose.staging.yml up -d https-portal
             fi
+
             echo "===== デプロイ完了 ====="
