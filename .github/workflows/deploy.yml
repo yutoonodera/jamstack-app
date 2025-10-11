@@ -24,7 +24,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          tar czf next-build.tar.gz .next public package*.json
+          tar czf next-build.tar.gz .next package*.json
 
       # =============================
       # 3. SSH設定
