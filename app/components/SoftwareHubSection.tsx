@@ -34,21 +34,38 @@ export default function SoftwareHubSection() {
   const subCards = [
     {
       icon: "📰",
-      title: "WordPressを運用中の方へ",
-      description:
-        "既存のWordPressサイトの高速化・セキュリティ強化・Jamstack化など、運用基盤の改善や保守運用をサポートします。",
-      href: "/services/software/wordpress",
-      buttonText: "詳しく見る",
-    },
-    {
-      icon: "🌐",
       title: "情報発信サイトを新しく作りたい方へ",
       description:
         "Next.jsやHeadless CMSを活用し、SEO・デザイン・運用性を兼ね備えた情報発信サイトを構築します。",
       href: "/services/software/media",
       buttonText: "詳しく見る",
     },
+    {
+      icon: "🛒",
+      title: "ECサイト・予約システムを構築したい方へ",
+      description:
+        "Next.jsとStripeやShopify APIを活用し、スピードと柔軟性を両立したEC・予約システムを構築します。",
+      href: "/services/software/ec",
+      buttonText: "詳しく見る",
+    },
+    {
+      icon: "📊",
+      title: "データを見える化したい方へ",
+      description:
+        "Chart.jsやRechartsを用い、アクセス数や売上推移などをグラフで可視化。経営やマーケティングの意思決定を支援します。",
+      href: "/services/software/analytics",
+      buttonText: "詳しく見る",
+    },
+    {
+        icon: "💬",
+        title: "1時間単位で相談したい方へ",
+        description:
+          "開発・技術・システム企画に関するご相談を、1時間からご利用いただけます。要件整理や改善提案など、経営と開発の間をつなぎます。",
+        href: "/services/software/consulting",
+        buttonText: "詳しく見る",
+    },
   ];
+
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-20">
