@@ -43,8 +43,7 @@ export default function AsctPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5">
             <dt className="font-medium text-gray-700">電話番号</dt>
             <dd className="md:col-span-2">
-              （記入）<br />
-              ※電話での問い合わせ対応時間があれば明記してください。非公開の場合は合理的理由と代替手段（メールフォーム）を記載します。
+              090-2183-4524
             </dd>
           </div>
 
