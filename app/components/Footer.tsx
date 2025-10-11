@@ -8,6 +8,7 @@ export default function Footer() {
         { label: "技術ブログ", href: "/tech-blog" },
         { label: "onody-log", href: "/onody-log" },
         { label: "お問い合わせ", href: "/contact" },
+        { label: "特定商取引法に基づく表記", href: "/legal/asct" },
       ],
     ];
 
