@@ -36,14 +36,13 @@ export default function AsctPage() {
             <dd className="md:col-span-2">
               〒810-0001<br />
               福岡県福岡市中央区天神２丁目３−１０ 天神パインクレスト 716<br />
-              ※リモート運営の場合でも登記住所または連絡可能な所在地を明記してください。
             </dd>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5">
             <dt className="font-medium text-gray-700">電話番号</dt>
             <dd className="md:col-span-2">
-              090-2183-4524
+              固定電話なしのため、info@movee.jpへお願いします。
             </dd>
           </div>
 
