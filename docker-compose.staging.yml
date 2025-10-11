@@ -61,11 +61,12 @@ services:
       DOMAINS: >
         stg.movee.jp -> http://web-${DEPLOY_COLOR}:3000,
         wp.stg.movee.jp -> http://wordpress-${DEPLOY_COLOR}:80
-      STAGE: ${STAGE:-staging}
+      STAGE: ${STAGE:-staging}   # ← 環境に応じて production/staging 切替
       HTTPS_METHOD: redirect
       FORCE_RENEW: "false"
     volumes:
-      - https-portal-data:/var/lib/https-portal
+      - https-certs:/var/lib/https-portal/certs
+      - https-nginx:/var/lib/https-portal/nginx
     depends_on:
       - web
       - wordpress
@@ -77,7 +78,8 @@ volumes:
   wordpress_data_green:
   db_data_blue:
   db_data_green:
-  https-portal-data:
+  https-certs:     # 証明書保存用
+  https-nginx:     # Nginx設定（都度再構築される）
 
 networks:
   app-network:

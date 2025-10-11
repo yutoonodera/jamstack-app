@@ -104,7 +104,7 @@ jobs:
       # =============================
       # https-portal初回 or 切替処理
       # =============================
-      - name: Setup or switch https-portal
+      - name: Setup or switch https-portal (production-safe)
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -113,16 +113,20 @@ jobs:
           script: |
             set -eux
             COLOR=${{ steps.color.outputs.color }}
+            APP_DIR=/home/ubuntu/staging-app-$COLOR
 
-            # 初回: https-portalが存在しなければ作成
+            echo "===== https-portal 設定・切替 ====="
+
+            # 初回起動 or 設定切替（certsは保持）
             if ! docker ps -a --format '{{.Names}}' | grep -q 'https-portal'; then
-              echo "===== 初回: https-portalを起動 ====="
-              DEPLOY_COLOR=$COLOR \
-              docker compose -f /home/ubuntu/staging-app-$COLOR/docker-compose.staging.yml up -d https-portal
+              echo "初回起動: https-portal を立ち上げます"
+              DEPLOY_COLOR=$COLOR STAGE=staging \
+              docker compose -f $APP_DIR/docker-compose.staging.yml \
+                --env-file $APP_DIR/.env.staging up -d https-portal
             else
-              echo "===== 切り替え: $COLOR を有効化 ====="
-              docker exec -i https-portal sed -i "s/web-blue/web-${COLOR}/g" /var/lib/https-portal/domains.conf || true
-              docker exec -i https-portal sed -i "s/wordpress-blue/wordpress-${COLOR}/g" /var/lib/https-portal/domains.conf || true
+              echo "既存証明書を保持しつつ切替"
+              docker exec -i https-portal sed -i "s/web-blue/web-${COLOR}/g" /var/lib/https-portal/nginx/domains.conf || true
+              docker exec -i https-portal sed -i "s/wordpress-blue/wordpress-${COLOR}/g" /var/lib/https-portal/nginx/domains.conf || true
               docker restart https-portal
             fi
 
