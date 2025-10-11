@@ -75,7 +75,7 @@ services:
       DOMAINS: >
         stg.movee.jp -> http://web-blue:3000,
         wp.stg.movee.jp -> http://wordpress-blue:80
-      STAGE: production         # "staging" にすると Let's Encrypt のテストCAを使用
+      STAGE: staging         # "staging" にすると Let's Encrypt のテストCAを使用
       HTTPS_METHOD: redirect    # HTTP を自動で HTTPS にリダイレクト
       FORCE_RENEW: "false"      # 証明書の強制再発行は無効
     volumes:
